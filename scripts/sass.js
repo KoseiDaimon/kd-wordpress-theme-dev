@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
-import { createIndexFiles } from "./createIndexFiles.js";
+import { generateIndexFiles } from "./generateIndexFiles.js";
 
 const scssDir = "./src/scss";
 const scssGlob = "./src/scss/**/*.scss";
@@ -38,7 +38,7 @@ const compileScss = async () => {
 };
 
 // _index.scssの生成とSCSSのコンパイル
-createIndexFiles(scssDir)
+generateIndexFiles(scssDir)
   .then(() => {
     console.log(chalk.green("[Success] Index files created successfully."));
     return compileScss();
