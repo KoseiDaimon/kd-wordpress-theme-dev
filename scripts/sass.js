@@ -7,25 +7,19 @@ import chalk from "chalk";
 import chokidar from "chokidar";
 import { generateIndexFiles } from "./generateIndexFiles.js";
 
-const scssDir = "./src/scss";
-const scssGlob = "./src/scss/**/*.scss";
-const distDir = "./assets/css";
-
 const watch = process.argv.includes("--watch");
 
-const compileScss = async () => {
+const compileScss = async (srcDir, distDir) => {
   try {
-    const srcPaths = await glob(scssGlob);
+    const srcGlob = path.join(srcDir, "**/*.scss");
+    const srcPaths = await glob(srcGlob);
     await fs.mkdir(distDir, { recursive: true });
-
     for (const srcPath of srcPaths) {
       if (path.basename(srcPath).startsWith("_")) {
         continue;
       }
-
       const distFileName = path.basename(srcPath, ".scss") + ".css";
       const distPath = path.join(distDir, distFileName);
-
       try {
         const result = await sass.compileAsync(srcPath);
         await fs.writeFile(distPath, result.css);
@@ -40,11 +34,14 @@ const compileScss = async () => {
   }
 };
 
+const scssDir = "./src/scss";
+const distDir = "./assets/css";
+
 // _index.scssの生成とSCSSのコンパイル
 generateIndexFiles(scssDir)
   .then(() => {
     console.log(chalk.green("[Success] Index files created successfully."));
-    return compileScss();
+    return compileScss(scssDir, distDir);
   })
   .then(() => {
     console.log(chalk.green("[Success] SCSS compilation completed."));
@@ -60,13 +57,12 @@ if (watch) {
     ignored: [/(^|[/\\])\../, /_index\.scss$/],
     persistent: true,
   });
-
   watcher.on("change", (path) => {
     console.log(`${chalk.blue("Change detected:")} ${path}`);
     generateIndexFiles(scssDir)
       .then(() => {
         console.log(chalk.green("[Success] Index files created successfully."));
-        return compileScss();
+        return compileScss(scssDir, distDir);
       })
       .then(() => {
         console.log(chalk.green("[Success] SCSS compilation completed."));
@@ -75,6 +71,5 @@ if (watch) {
         console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
       });
   });
-
   console.log(chalk.blue("Watching for changes..."));
 }
