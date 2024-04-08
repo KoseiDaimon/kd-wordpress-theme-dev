@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\"",
-    "dev:sass": "node ./scripts/sass.mjs --watch",
+    "dev:sass": "node ./scripts/sass.js --watch",
     "build": "npm-run-all build:*",
     "build:sass": "node scripts/sass.js"
   },
