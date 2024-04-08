@@ -1,45 +1,61 @@
-// scripts/sass.js
 import * as sass from "sass";
-import config from '../config.json' assert { type: 'json' };
-import fs from "fs";
-import postcss from "postcss";
-import autoprefixer from "autoprefixer";
-import postcssSortMediaQueries from "postcss-sort-media-queries";
-import cssDeclarationSorter from "css-declaration-sorter";
-import postcssNormalizeCharset from "postcss-normalize-charset";
-import chokidar from "chokidar";
+import path from "path";
+import fs from "fs/promises";
+import { glob } from "glob";
 
-async function compileSass() {
-  try {
-    const result = sass.compile(config.src.sass);
-    const cssContent = result.css;
+const currentDir = process.cwd();
+console.log(`Current directory: ${currentDir}`);
 
-    const plugins = [
-      autoprefixer,
-      postcssSortMediaQueries,
-      cssDeclarationSorter,
-      postcssNormalizeCharset,
-    ];
+const scssFilePath = path.join(currentDir, "src", "scss", "common", "common.scss");
+const cssOutputDir = path.join(currentDir, "assets", "css");
+const cssOutputPath = path.join(cssOutputDir, "common.css");
 
-    const processedCss = await postcss(plugins).process(cssContent, {
-      from: undefined,
-    });
-
-    fs.writeFileSync(config.dist.css, processedCss.css);
-    console.log('SASS compiled successfully.');
-  } catch (err) {
-    console.error('Error:', err.message);
-  }
+try {
+  const result = await sass.compileAsync(scssFilePath);
+  await fs.mkdir(cssOutputDir, { recursive: true });
+  await fs.writeFile(cssOutputPath, result.css);
+  console.log(`${scssFilePath} has been compiled to ${cssOutputPath}`);
+} catch (err) {
+  console.error(`Failed to compile ${scssFilePath}: ${err}`);
 }
 
-const watch = process.argv.includes('--watch');
+// const scssGlob = "./src/scss/**/*.scss";
+// const cssOutputDir = "./assets/css";
 
-if (watch) {
-  chokidar.watch(config.src.sass).on('change', (filePath) => {
-    console.log(`File ${filePath} changed`);
-    compileSass();
-  });
-  console.log('Watching for changes...');
-} else {
-  compileSass();
-}
+// const srcPaths = await glob(scssGlob);
+// console.log(srcPaths);
+
+// for (const srcPath of srcPaths) {
+//   const distPath = `${cssOutputDir}/${path.basename(srcPath, ".scss")}.css`;
+//   console.log(distPath);
+
+//   try {
+//     const result = await sass.compileAsync(srcPath);
+//     await fs.writeFile(srcPath, result.css);
+//     console.log(`${srcPath} has been compiled to ${srcPath}`);
+//   } catch (err) {
+//     console.error(`Failed to compile ${srcPath}: ${err}`);
+//   }
+// }
+
+// glob(scssGlob, {}, async (err, scssFilePaths) => {
+//   if (err) {
+//     console.error(err);
+//     return;
+//   }
+
+//   console.log(scssFilePaths);
+
+//   for (const scssFilePath of scssFilePaths) {
+//     const cssFilePath = `${cssOutputDir}/${path.basename(scssFilePath, '.scss')}.css`;
+
+//     console.log(scssFilePath);
+//     try {
+//       const result = await sass.compileAsync(scssFilePath);
+//       await fs.writeFile(cssFilePath, result.css);
+//       console.log(`${scssFilePath} has been compiled to ${cssFilePath}`);
+//     } catch (err) {
+//       console.error(`Failed to compile ${scssFilePath}: ${err}`);
+//     }
+//   }
+// });

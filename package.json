@@ -5,19 +5,16 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\"",
-    "dev:sass": "node scripts/sass.js --watch",
-    "dev:images": "node scripts/optimizeImages.js --config config.json --watch",
-    "dev:js": "node scripts/esbuild.js --config config.json --watch",
+    "dev:sass": "node ./scripts/sass.mjs --watch",
     "build": "npm-run-all build:*",
-    "build:sass": "node scripts/sass.js",
-    "build:images": "node scripts/optimizeImages.js --config config.json",
-    "build:js": "node scripts/esbuild.js --config config.json"
+    "build:sass": "node scripts/sass.js"
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",
     "browser-sync": "^3.0.2",
     "css-declaration-sorter": "^7.2.0",
     "esbuild": "^0.20.2",
+    "glob": "^10.3.12",
     "postcss": "^8.4.38",
     "postcss-normalize-charset": "^6.0.2",
     "postcss-sort-media-queries": "^5.2.0",

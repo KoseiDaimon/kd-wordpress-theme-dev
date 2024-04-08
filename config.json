@@ -1,8 +1,8 @@
 {
   "src": {
-    "sass": "src/scss",
-    "images": "src/images",
-    "js": "src/js"
+    "sass": "./src/scss/**/*",
+    "images": "./src/images",
+    "js": "./src/js"
   },
   "dist": {
     "css": "./assets/css",
