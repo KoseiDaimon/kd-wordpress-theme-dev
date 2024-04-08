@@ -1,6 +1,6 @@
 @use "../../../_global" as *;
 
-.test {
+.c-test {
   background-color: red;
   @include mq(md) {
     background-color: blue;

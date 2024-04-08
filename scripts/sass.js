@@ -4,11 +4,14 @@ import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
+import chokidar from "chokidar";
 import { generateIndexFiles } from "./generateIndexFiles.js";
 
 const scssDir = "./src/scss";
 const scssGlob = "./src/scss/**/*.scss";
 const distDir = "./assets/css";
+
+const watch = process.argv.includes("--watch");
 
 const compileScss = async () => {
   try {
@@ -50,3 +53,28 @@ generateIndexFiles(scssDir)
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
     process.exit(1);
   });
+
+// watchの場合は、ファイルを監視
+if (watch) {
+  const watcher = chokidar.watch(scssDir, {
+    ignored: [/(^|[/\\])\../, /_index\.scss$/],
+    persistent: true,
+  });
+
+  watcher.on("change", (path) => {
+    console.log(`${chalk.blue("Change detected:")} ${path}`);
+    generateIndexFiles(scssDir)
+      .then(() => {
+        console.log(chalk.green("[Success] Index files created successfully."));
+        return compileScss();
+      })
+      .then(() => {
+        console.log(chalk.green("[Success] SCSS compilation completed."));
+      })
+      .catch((err) => {
+        console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
+      });
+  });
+
+  console.log(chalk.blue("Watching for changes..."));
+}
