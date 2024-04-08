@@ -8,7 +8,10 @@ const isScssPartial = (fileName) => {
 };
 
 const createIndexContent = (scssFiles) => {
-  return scssFiles.map((file) => `@forward "./${file.slice(0, -5)}";`).join("\n");
+  return [
+    "// This file is generated automatically by scripts/generateIndexFiles.js",
+    ...scssFiles.map((file) => `@forward "./${file.slice(0, -5)}";`),
+  ].join("\n");
 };
 
 export const generateIndexFiles = async (dir) => {
