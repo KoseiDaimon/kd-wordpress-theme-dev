@@ -1,0 +1,45 @@
+//
+// Base
+//
+
+@use "../../_global" as *;
+
+// リキッドレイアウト対応
+html {
+  //~375px
+  @media (max-width: 375px) {
+    font-size: vw(16, 375);
+  }
+
+  //375px~787px
+  font-size: 16px;
+
+  @include mq(md) {
+    font-size: vw(16, strip-unit($width-pc));
+  }
+
+  //width-pc~max-screen
+  @media (min-width: $width-pc) {
+    font-size: 16px;
+  }
+}
+
+// フォントの指定
+body {
+  font-family: $fontFamily-main;
+  font-weight: $fontWeight-default;
+  color: $color-text;
+  letter-spacing: 0.1em;
+}
+
+// hover
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.3s;
+  @include mq(md) {
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}

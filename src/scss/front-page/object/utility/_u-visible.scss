@@ -1,0 +1,28 @@
+@use "../../../_global" as *;
+
+////////////////////
+// 非表示設定
+////////////////////
+
+// スマホでのみ表示
+.u-visible-sp {
+  @include mq(md) {
+    display: none;
+  }
+}
+
+// PCでのみ表示(block)
+.u-visible-pc {
+  display: none;
+  @include mq(md) {
+    display: block;
+  }
+}
+
+// PCでのみ表示(flex)
+.u-visible-pc-flex {
+  display: none;
+  @include mq(md) {
+    display: flex;
+  }
+}

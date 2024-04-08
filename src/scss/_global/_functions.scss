@@ -1,0 +1,26 @@
+@use "sass:math";
+
+// =========================================
+// 数値操作用のユーティリティ関数
+// =========================================
+
+// 変数の値から数値のみを取り出す
+// 使用例: $value: strip-unit(10px); // 10
+@function strip-unit($number) {
+  @if type-of($number) == "number" and not unitless($number) {
+    @return math.div($number, $number * 0 + 1);
+  }
+  @return $number;
+}
+
+// 画面幅に合わせて、要素のサイズを調整する
+// 使用例: width: vw(100px, 1440px); // 6.9444vw
+@function vw($size, $window_width) {
+  @return math.div($size, $window_width) * 100vw;
+}
+
+// remへの計算式（16pxを基準としている。10pxを基準とする場合は16を10に変更する）
+// 使用例: font-size: rem(16px); // 1rem
+@function rem($pixels) {
+  @return math.div($pixels, 16) * 1rem;
+}

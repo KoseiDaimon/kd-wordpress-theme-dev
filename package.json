@@ -1,0 +1,30 @@
+{
+  "name": "my-theme",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:*",
+    "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\"",
+    "dev:sass": "node scripts/sass.js --watch",
+    "dev:images": "node scripts/optimizeImages.js --config config.json --watch",
+    "dev:js": "node scripts/esbuild.js --config config.json --watch",
+    "build": "npm-run-all build:*",
+    "build:sass": "node scripts/sass.js",
+    "build:images": "node scripts/optimizeImages.js --config config.json",
+    "build:js": "node scripts/esbuild.js --config config.json"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.19",
+    "browser-sync": "^3.0.2",
+    "css-declaration-sorter": "^7.2.0",
+    "esbuild": "^0.20.2",
+    "postcss": "^8.4.38",
+    "postcss-normalize-charset": "^6.0.2",
+    "postcss-sort-media-queries": "^5.2.0",
+    "sass": "^1.74.1",
+    "sharp": "^0.33.3"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}

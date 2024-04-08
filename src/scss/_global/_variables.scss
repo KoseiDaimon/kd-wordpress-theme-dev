@@ -1,0 +1,84 @@
+@use "sass:math";
+
+// =========================================
+// インナー幅の設定
+// =========================================
+// コンテンツの幅（最も共通の幅が多い部分）
+$width-pc: 1280px;
+
+// =========================================
+// デフォルトの余白
+// =========================================
+// padding
+$padding-pc: 30px;
+$padding-sp: 16px;
+
+// =========================================
+// フォントの設定
+// =========================================
+// font-family
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;500;700&family=Bad+Script&family=Caveat:wght@700&display=swap');
+$fontFamily-main: "Noto Serif JP";
+$fontFamily-sub: "Bad Script";
+$fontFamily-accent: "";
+
+// font-weight
+$fontWeight-light: 200;
+$fontWeight-default: 500;
+$fontWeight-bold: 700;
+
+// =========================================
+// 色の設定
+// =========================================
+// 本サイト特有の色の設定
+$color-text: #333;
+$color-main: #64B5F6;
+$color-sub: #FFA726;
+$color-accent: #EC407A;
+
+// 一般的な色の指定
+// Material Colors: https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors
+// Color Name Finder: https://colors.artyclick.com/color-name-finder/
+$color-black: #000;
+$color-white: #fff;
+$color-gray100: #F5F5F5;
+$color-gray200: #EEEEEE;
+$color-gray300: #E0E0E0;
+$color-red: #F44336;
+$color-orange: #FF9800;
+$color-yellow: #FFEB3B;
+$color-green: #4CAF50;
+$color-blue: #2196F3;
+
+// =========================================
+// ブレークポイントとメディアクエリの設定
+// =========================================
+//
+// 使用例:
+// p {
+//   color: red;
+//   @include mq(md) {
+//     color: blue;
+//   }
+// }
+
+// ブレークポイントの定義
+$breakpoints: (
+  'sm': 400px,
+  'md': 768px,
+  'lg': 1080px,
+  'xl': 1440px
+) !default;
+
+// メディアクエリのミックスイン
+@mixin mq($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $breakpoint-value: map-get($breakpoints, $breakpoint);
+    @media (min-width: #{$breakpoint-value}) {
+      @content;
+    }
+  }
+  @else {
+    @error 'Invalid breakpoint: #{$breakpoint}.';
+  }
+}
