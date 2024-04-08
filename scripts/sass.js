@@ -37,39 +37,53 @@ const compileScss = async (srcDir, distDir) => {
 const scssDir = "./src/scss";
 const distDir = "./assets/css";
 
-// _index.scssの生成とSCSSのコンパイル
-generateIndexFiles(scssDir)
-  .then(() => {
+const handleChange = () => {
+  generateIndexFiles(scssDir)
+    .then(() => {
+      console.log(chalk.green("[Success] Index files created successfully."));
+      return compileScss(scssDir, distDir);
+    })
+    .then(() => {
+      console.log(chalk.green("[Success] SCSS compilation completed."));
+    })
+    .catch((err) => {
+      console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
+    });
+};
+
+(async () => {
+  try {
+    await generateIndexFiles(scssDir);
     console.log(chalk.green("[Success] Index files created successfully."));
-    return compileScss(scssDir, distDir);
-  })
-  .then(() => {
+    await compileScss(scssDir, distDir);
     console.log(chalk.green("[Success] SCSS compilation completed."));
-  })
-  .catch((err) => {
+
+    if (watch) {
+      const watcher = chokidar.watch(scssDir, {
+        ignored: [/(^|[/\\])\../, /_index\.scss$/, /\.css$/],
+        persistent: true,
+        ignoreInitial: true,
+      });
+
+      watcher.on("change", (path) => {
+        console.log(`${chalk.blue("Change detected:")} ${path}`);
+        handleChange();
+      });
+
+      watcher.on("add", (path) => {
+        console.log(`${chalk.blue("File added:")} ${path}`);
+        handleChange();
+      });
+
+      watcher.on("unlink", (path) => {
+        console.log(`${chalk.blue("File removed:")} ${path}`);
+        handleChange();
+      });
+
+      console.log(chalk.blue("Watching for changes..."));
+    }
+  } catch (err) {
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
     process.exit(1);
-  });
-
-// watchの場合は、ファイルを監視
-if (watch) {
-  const watcher = chokidar.watch(scssDir, {
-    ignored: [/(^|[/\\])\../, /_index\.scss$/],
-    persistent: true,
-  });
-  watcher.on("change", (path) => {
-    console.log(`${chalk.blue("Change detected:")} ${path}`);
-    generateIndexFiles(scssDir)
-      .then(() => {
-        console.log(chalk.green("[Success] Index files created successfully."));
-        return compileScss(scssDir, distDir);
-      })
-      .then(() => {
-        console.log(chalk.green("[Success] SCSS compilation completed."));
-      })
-      .catch((err) => {
-        console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
-      });
-  });
-  console.log(chalk.blue("Watching for changes..."));
-}
+  }
+})();
