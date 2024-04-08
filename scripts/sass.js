@@ -3,22 +3,6 @@ import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
 
-const currentDir = process.cwd();
-console.log(`Current directory: ${currentDir}`);
-
-// const scssFilePath = path.join(currentDir, "src", "scss", "common", "common.scss");
-// const cssOutputDir = path.join(currentDir, "assets", "css");
-// const cssOutputPath = path.join(cssOutputDir, "common.css");
-
-// try {
-//   const result = await sass.compileAsync(scssFilePath);
-//   await fs.mkdir(cssOutputDir, { recursive: true });
-//   await fs.writeFile(cssOutputPath, result.css);
-//   console.log(`${scssFilePath} has been compiled to ${cssOutputPath}`);
-// } catch (err) {
-//   console.error(`Failed to compile ${scssFilePath}: ${err}`);
-// }
-
 const scssGlob = "./src/scss/**/*.scss";
 const distDir = "./assets/css";
 
@@ -44,25 +28,3 @@ for (const srcPath of srcPaths) {
     console.error(`Failed to compile ${srcPath}: ${err}`);
   }
 }
-
-// glob(scssGlob, {}, async (err, scssFilePaths) => {
-//   if (err) {
-//     console.error(err);
-//     return;
-//   }
-
-//   console.log(scssFilePaths);
-
-//   for (const scssFilePath of scssFilePaths) {
-//     const cssFilePath = `${cssOutputDir}/${path.basename(scssFilePath, '.scss')}.css`;
-
-//     console.log(scssFilePath);
-//     try {
-//       const result = await sass.compileAsync(scssFilePath);
-//       await fs.writeFile(cssFilePath, result.css);
-//       console.log(`${scssFilePath} has been compiled to ${cssFilePath}`);
-//     } catch (err) {
-//       console.error(`Failed to compile ${scssFilePath}: ${err}`);
-//     }
-//   }
-// });
