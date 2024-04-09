@@ -5,11 +5,11 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
-    "dev:sass": "node ./scripts/sass.js --watch",
+    "dev:sass": "node ./scripts/optimizeSass.js --watch",
     "dev:js": "node ./scripts/optimizeJs.js --watch",
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/removeDist.js",
-    "build:sass": "node scripts/sass.js",
+    "build:sass": "node scripts/optimizeSass.js",
     "build:js": "node ./scripts/optimizeJs.js"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-// scripts/sass.js
+// scripts/optimizeSass.js
 import * as sass from "sass";
 import path from "path";
 import fs from "fs/promises";
