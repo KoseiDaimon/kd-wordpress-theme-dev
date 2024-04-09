@@ -10,6 +10,10 @@ import { generateIndexFiles } from "./generateIndexFiles.js";
 // コマンドライン引数に "--watch" が含まれているかどうかを確認
 const watch = process.argv.includes("--watch");
 
+// SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
+const srcDir = "./src/scss";
+const distDir = "./assets/css";
+
 // SCSS ファイルをコンパイルする関数
 const compileScss = async (srcDir, distDir) => {
   try {
@@ -57,10 +61,6 @@ const compileScss = async (srcDir, distDir) => {
     process.exit(1);
   }
 };
-
-// SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
-const srcDir = "./src/scss";
-const distDir = "./assets/css";
 
 // ファイルの変更を処理する関数
 const handleChange = (changedFilePath) => {
@@ -132,7 +132,7 @@ const handleChange = (changedFilePath) => {
       });
 
       // ファイル監視の開始メッセージを表示
-      console.log(chalk.blue("Watching for changes..."));
+      console.log(chalk.blue("Watching SCSS for changes..."));
     }
   } catch (err) {
     // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示

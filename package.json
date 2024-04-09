@@ -6,9 +6,11 @@
     "dev": "npm-run-all --parallel dev:*",
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
     "dev:sass": "node ./scripts/sass.js --watch",
+    "dev:js": "node ./scripts/optimizeJs.js --watch",
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/removeDist.js",
-    "build:sass": "node scripts/sass.js"
+    "build:sass": "node scripts/sass.js",
+    "build:js": "node ./scripts/optimizeJs.js"
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",
@@ -20,7 +22,8 @@
     "postcss-normalize-charset": "^6.0.2",
     "postcss-sort-media-queries": "^5.2.0",
     "sass": "^1.74.1",
-    "sharp": "^0.33.3"
+    "sharp": "^0.33.3",
+    "terser": "^5.30.3"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
