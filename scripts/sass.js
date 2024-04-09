@@ -13,6 +13,10 @@ const compileScss = async (srcDir, distDir) => {
   try {
     const srcGlob = path.join(srcDir, "**", "*.scss").replace(/\\/g, "/");
     const srcPaths = await glob(srcGlob);
+    if (srcPaths.length === 0) {
+      console.warn(chalk.yellow(`Warning: No SCSS files found in ${srcDir}`));
+      return;
+    }
     await fs.mkdir(distDir, { recursive: true });
     for (const srcPath of srcPaths) {
       if (path.basename(srcPath).startsWith("_")) {
