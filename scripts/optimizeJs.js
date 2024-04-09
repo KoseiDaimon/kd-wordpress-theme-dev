@@ -159,11 +159,13 @@ const watchFiles = () => {
 try {
   // コマンドライン引数に "--watch" が含まれている場合はファイル監視を開始
   if (watch) {
-    copyJs(srcDir, distDir);
+    await copyJs(srcDir, distDir);
+    console.log(chalk.green("JavaScript files copied successfully."));
     watchFiles();
   } else {
     // コマンドライン引数に "--watch" が含まれていない場合はJavaScriptファイルを最適化
-    optimizeJs(srcDir, distDir);
+    await optimizeJs(srcDir, distDir);
+    console.log(chalk.green("JavaScript files optimized successfully."));
   }
 } catch (err) {
   console.error(`${chalk.red("Error:")} ${err}`);
