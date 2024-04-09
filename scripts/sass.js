@@ -37,10 +37,11 @@ const compileScss = async (srcDir, distDir) => {
 const scssDir = "./src/scss";
 const distDir = "./assets/css";
 
-const handleChange = () => {
-  generateIndexFiles(scssDir)
+const handleChange = (filePath) => {
+  const dirPath = path.dirname(filePath);
+  generateIndexFiles(dirPath)
     .then(() => {
-      console.log(chalk.green("[Success] Index files created successfully."));
+      console.log(chalk.green(`[Success] Index files created successfully for ${dirPath}.`));
       return compileScss(scssDir, distDir);
     })
     .then(() => {
@@ -67,17 +68,17 @@ const handleChange = () => {
 
       watcher.on("change", (path) => {
         console.log(`${chalk.blue("Change detected:")} ${path}`);
-        handleChange();
+        handleChange(path);
       });
 
       watcher.on("add", (path) => {
         console.log(`${chalk.blue("File added:")} ${path}`);
-        handleChange();
+        handleChange(path);
       });
 
       watcher.on("unlink", (path) => {
         console.log(`${chalk.blue("File removed:")} ${path}`);
-        handleChange();
+        handleChange(path);
       });
 
       console.log(chalk.blue("Watching for changes..."));
