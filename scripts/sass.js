@@ -59,21 +59,21 @@ const compileScss = async (srcDir, distDir) => {
 };
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
-const scssDir = "./src/scss";
+const srcDir = "./src/scss";
 const distDir = "./assets/css";
 
 // ファイルの変更を処理する関数
-const handleChange = (filePath) => {
+const handleChange = (changedFilePath) => {
   // 変更されたファイルのディレクトリを取得
-  const dirPath = path.dirname(filePath);
+  const changedDirPath = path.dirname(changedFilePath);
 
   // インデックス ファイルを生成
-  generateIndexFiles(dirPath)
+  generateIndexFiles(changedDirPath)
     .then(() => {
       // インデックス ファイルの生成に成功したことを示すメッセージを表示
-      console.log(chalk.green(`[Success] Index files created successfully for ${dirPath}.`));
+      console.log(chalk.green(`[Success] Index files created successfully for ${changedDirPath}.`));
       // SCSS ファイルをコンパイル
-      return compileScss(scssDir, distDir);
+      return compileScss(srcDir, distDir);
     })
     .then(() => {
       // SCSS コンパイルの完了メッセージを表示
@@ -89,19 +89,19 @@ const handleChange = (filePath) => {
 (async () => {
   try {
     // インデックス ファイルを生成
-    await generateIndexFiles(scssDir);
+    await generateIndexFiles(srcDir);
     // インデックス ファイルの生成成功メッセージを表示
     console.log(chalk.green("[Success] Index files created successfully."));
 
     // SCSS ファイルをコンパイル
-    await compileScss(scssDir, distDir);
+    await compileScss(srcDir, distDir);
     // SCSS コンパイルの完了メッセージを表示
     console.log(chalk.green("[Success] SCSS compilation completed."));
 
     // "--watch" オプションが指定されている場合
     if (watch) {
       // ファイル監視のためのオプションを設定
-      const watcher = chokidar.watch(scssDir, {
+      const watcher = chokidar.watch(srcDir, {
         ignored: [/(^|[/\\])\../, /_index\.scss$/, /\.css$/],
         persistent: true,
         ignoreInitial: true,
