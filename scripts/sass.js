@@ -80,6 +80,11 @@ const handleChange = () => {
         handleChange();
       });
 
+      watcher.on("unlinkDir", (path) => {
+        console.log(`${chalk.blue("Directory removed:")} ${path}`);
+        handleChange();
+      });
+
       console.log(chalk.blue("Watching for changes..."));
     }
   } catch (err) {
