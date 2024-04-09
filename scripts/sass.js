@@ -11,8 +11,10 @@ const watch = process.argv.includes("--watch");
 
 const compileScss = async (srcDir, distDir) => {
   try {
-    const srcGlob = path.join(srcDir, "**/*.scss");
+    const srcGlob = path.join(srcDir, "**", "*.scss").replace(/\\/g, "/");
     const srcPaths = await glob(srcGlob);
+    console.log(srcGlob);
+    console.log(srcPaths);
     await fs.mkdir(distDir, { recursive: true });
     for (const srcPath of srcPaths) {
       if (path.basename(srcPath).startsWith("_")) {
