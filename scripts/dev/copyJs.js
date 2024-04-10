@@ -1,9 +1,10 @@
-// scripts/dev/bundleJs.js
+// scripts/dev/copyJs.js
 import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
 import chokidar from "chokidar";
+import { copyFiles } from "../common/copyFiles.js";
 
 // ソースのディレクトリと、出力先ディレクトリを設定
 const srcDir = "./src/js";
@@ -48,13 +49,13 @@ const copyJs = async (srcDir, distDir) => {
 };
 
 // ファイルの変更を処理する関数
-const handleChange = (changedFilePath) => {
+const handleChange = async (changedFilePath) => {
   try {
     // 変更されたファイルのディレクトリを取得
     const changedDirPath = path.dirname(changedFilePath);
 
-    // 変更されたディレクトリ内のJavaScriptファイルを最適化
-    copyJs(changedDirPath, distDir);
+    // 変更されたディレクトリ内のJavaScriptファイルをコピー
+    await copyFiles(changedDirPath, distDir, "js");
   } catch (err) {
     console.error(`${chalk.red("Error:")} Failed to handle file change: ${err}`);
   }
@@ -96,7 +97,7 @@ const watchFiles = () => {
 };
 
 try {
-  await copyJs(srcDir, distDir);
+  await copyFiles(srcDir, distDir, "js");
   console.log(chalk.green("JavaScript files copied successfully."));
   watchFiles();
 } catch (err) {
