@@ -1,8 +1,8 @@
 // 必要なモジュールをインポート
 import chalk from "chalk";
+import ScssProcessor from "../utils/ScssProcessor.js";
 import PostCssProcessor from "../utils/PostCssProcessor.js";
 import CleanCssProcessor from "../utils/CleanCssProcessor.js";
-import ScssProcessor from "../utils/ScssProcessor.js";
 
 // ソースディレクトリと出力ディレクトリを設定
 const srcDir = "./src/scss";
@@ -15,7 +15,7 @@ const scssProcessor = new ScssProcessor(srcDir, distDir);
 const postCssProcessor = new PostCssProcessor(distDir);
 
 // CleanCssProcessor インスタンスを作成
-const cleanCssProcessor = new CleanCssProcessor();
+const cleanCssProcessor = new CleanCssProcessor(distDir);
 
 // メイン処理
 (async () => {
@@ -28,6 +28,9 @@ const cleanCssProcessor = new CleanCssProcessor();
 
     // CSSを最適化
     await postCssProcessor.processCSS();
+
+    // CSSを圧縮
+    cleanCssProcessor.minifyCssFiles();
   } catch (err) {
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
     process.exit(1);
