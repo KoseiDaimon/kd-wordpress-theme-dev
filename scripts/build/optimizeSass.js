@@ -2,7 +2,6 @@
 import * as sass from "sass";
 import path from "path";
 import fs from "fs/promises";
-import { glob } from "glob";
 import chalk from "chalk";
 import postcss from "postcss";
 import autoprefixer from "autoprefixer";
@@ -60,32 +59,6 @@ const processScssFile = async (srcPath, distDir) => {
     console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
   } catch (err) {
     console.error(`${chalk.red("Error:")} Failed to compile ${srcPath}: ${err}`);
-  }
-};
-
-// 全てのSCSSファイルをコンパイルする関数
-const compileScss = async (srcDir, distDir) => {
-  try {
-    // SCSSファイルのパスを取得
-    const srcGlob = path.join(srcDir, "**", "*.scss").replace(/\\/g, "/");
-    const srcPaths = await glob(srcGlob);
-
-    if (srcPaths.length === 0) {
-      console.warn(chalk.yellow(`Warning: No SCSS files found in ${srcDir}`));
-      return;
-    }
-
-    // 出力ディレクトリを作成
-    await fs.mkdir(distDir, { recursive: true });
-
-    // 各SCSSファイルをコンパイル
-    const promises = srcPaths
-      .filter((srcPath) => !path.basename(srcPath).startsWith("_"))
-      .map((srcPath) => processScssFile(srcPath, distDir));
-    await Promise.all(promises);
-  } catch (err) {
-    console.error(`${chalk.red("Error:")} ${err}`);
-    process.exit(1);
   }
 };
 
