@@ -1,61 +1,52 @@
-// utils/copyDirectory.js
+// 必要なモジュールをインポート
+import * as sass from "sass";
 import path from "path";
 import fs from "fs/promises";
-import { glob } from "glob";
 import chalk from "chalk";
+import PostCssProcessor from "../utils/PostCssProcessor.js";
+import ScssProcessor from "../utils/ScssProcessor.js";
 
-const copyFile = async (srcPath, distPath) => {
+// ソースディレクトリと出力ディレクトリを設定
+const srcDir = "./src/scss";
+const distDir = "./assets/css";
+
+// ScssProcessor インスタンスを作成
+const scssProcessor = new ScssProcessor(srcDir, distDir);
+
+// PostCssProcessor インスタンスを作成
+const postCssProcessor = new PostCssProcessor(srcDir, distDir);
+
+// 単一のSCSSファイルをコンパイルする関数
+const processScssFile = async (srcPath, distDir) => {
+  const distFileName = path.basename(srcPath, ".scss") + ".css";
+  const distPath = path.join(distDir, distFileName);
+
   try {
-    // ファイルの内容を読み込む
-    const srcCode = await fs.readFile(srcPath);
+    // SCSSをコンパイル
+    const result = await sass.compileAsync(srcPath);
 
-    // 出力先ディレクトリが存在しない場合は作成
-    await fs.mkdir(path.dirname(distPath), { recursive: true });
+    // PostCSSプラグインを適用
+    const minifiedCss = await postCssProcessor.processCSS(result.css, srcPath, distPath);
 
-    // ファイルを出力先ディレクトリに書き込む
-    await fs.writeFile(distPath, srcCode);
-
+    // ミニファイ化されたCSSを書き込み
+    await fs.writeFile(distPath, minifiedCss);
     console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
   } catch (err) {
-    console.error(`${chalk.red("Error:")} Failed to copy ${srcPath}: ${err}`);
+    console.error(`${chalk.red("Error:")} Failed to compile ${srcPath}: ${err}`);
   }
 };
 
-const copyDirectory = async (srcDir, distDir) => {
+// メイン処理
+(async () => {
   try {
-    // ソースディレクトリ内のすべてのファイルとディレクトリのパスを取得
-    const srcGlob = path.join(srcDir, "**", "*").replace(/\\/g, "/");
-    const srcPaths = await glob(srcGlob);
+    // インデックスファイルを生成
+    await scssProcessor.generateIndexFiles();
 
-    // ソースディレクトリ内にファイルがない場合は警告を表示して処理を終了
-    if (srcPaths.length === 0) {
-      console.warn(chalk.yellow(`Warning: No files found in ${srcDir}`));
-      return;
-    }
-
-    // 出力先ディレクトリが存在しない場合は作成
-    await fs.mkdir(distDir, { recursive: true });
-
-    // 各ファイルとディレクトリを処理
-    for (const srcPath of srcPaths) {
-      // ファイルまたはディレクトリの情報を取得
-      const stats = await fs.stat(srcPath);
-
-      // 出力先ファイルのパスを生成
-      const distPath = path.join(distDir, path.relative(srcDir, srcPath));
-
-      if (stats.isDirectory()) {
-        // ディレクトリの場合は再帰的にコピー
-        await copyDirectory(srcPath, distPath);
-      } else {
-        // ファイルの場合はコピー
-        await copyFile(srcPath, distPath);
-      }
-    }
+    // SCSSをコンパイル
+    await scssProcessor.compile();
+    console.log(chalk.green("[Success] SCSS compilation completed."));
   } catch (err) {
-    console.error(`${chalk.red("Error:")} ${err}`);
+    console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
     process.exit(1);
   }
-};
-
-export { copyDirectory };
+})();
