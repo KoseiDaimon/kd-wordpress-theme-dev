@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
-import { generateIndexFiles } from "../common/generateIndexFiles.js";
+import { generateIndexFiles } from "../utils/generateIndexFiles.js";
 import postcss from "postcss";
 import autoprefixer from "autoprefixer";
 import postcssSortMediaQueries from "postcss-sort-media-queries";

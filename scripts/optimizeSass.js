@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
 import chokidar from "chokidar";
-import { generateIndexFiles } from "../common/generateIndexFiles.js";
+import { generateIndexFiles } from "../utils/generateIndexFiles.js";
 
 // コマンドライン引数に "--watch" が含まれているかどうかを確認
 const watch = process.argv.includes("--watch");

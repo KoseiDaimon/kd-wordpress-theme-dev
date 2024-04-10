@@ -1,4 +1,4 @@
-// common/copyDirectory.js
+// utils/copyDirectory.js
 import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";

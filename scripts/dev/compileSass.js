@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
 import chokidar from "chokidar";
-import { generateIndexFiles } from "../common/generateIndexFiles.js";
+import { generateIndexFiles } from "../utils/generateIndexFiles.js";
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
 const srcDir = "./src/scss";

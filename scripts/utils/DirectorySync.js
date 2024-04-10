@@ -1,4 +1,4 @@
-// common/DirectorySync.js
+// utils/DirectorySync.js
 import path from "path";
 import fs from "fs/promises";
 import chalk from "chalk";
