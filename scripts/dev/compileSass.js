@@ -1,100 +1,38 @@
 // scripts/dev/compileSass.js
-import * as sass from "sass";
 import path from "path";
-import fs from "fs/promises";
-import { glob } from "glob";
 import chalk from "chalk";
 import chokidar from "chokidar";
 import { generateIndexFiles } from "../utils/generateIndexFiles.js";
+import ScssCompiler from "../utils/ScssCompiler.js";
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
 const srcDir = "./src/scss";
 const distDir = "./assets/css";
 
-// SCSS ファイルをコンパイルする関数
-const compileScss = async (srcDir, distDir) => {
-  try {
-    // SCSS ファイルのパスパターンを作成
-    const srcGlob = path.join(srcDir, "**", "*.scss").replace(/\\/g, "/");
-    // パターンにマッチする SCSS ファイルのパスを取得
-    const srcPaths = await glob(srcGlob);
+// ScssCompiler インスタンスを作成
+const scssCompiler = new ScssCompiler(srcDir, distDir);
 
-    // SCSS ファイルが見つからない場合は警告を表示して関数を終了
-    if (srcPaths.length === 0) {
-      console.warn(chalk.yellow(`Warning: No SCSS files found in ${srcDir}`));
-      return;
-    }
-
-    // 出力先ディレクトリを作成 (存在しない場合)
-    await fs.mkdir(distDir, { recursive: true });
-
-    // 各 SCSS ファイルに対して処理を実行
-    for (const srcPath of srcPaths) {
-      // "_" で始まるファイル (パーシャル) はスキップ
-      if (path.basename(srcPath).startsWith("_")) {
-        continue;
-      }
-
-      // 出力先の CSS ファイル名を作成
-      const distFileName = path.basename(srcPath, ".scss") + ".css";
-      // 出力先の CSS ファイルのパスを作成
-      const distPath = path.join(distDir, distFileName);
-      // 出力先のソースマップファイル名を作成
-      const mapFileName = path.basename(srcPath, ".scss") + ".css.map";
-      // 出力先のソースマップファイルのパスを作成
-      const mapPath = path.join(distDir, mapFileName);
-
-      try {
-        // SCSS ファイルをコンパイル (ソースマップを生成)
-        const result = await sass.compileAsync(srcPath, {
-          sourceMap: mapPath,
-          sourceMapContents: true,
-        });
-
-        // コンパイル結果を CSS ファイルに書き込み
-        await fs.writeFile(distPath, result.css);
-
-        // ソースマップのコメントを CSS ファイルに追加
-        const sourceMapComment = `/*# sourceMappingURL=${mapFileName} */`;
-        await fs.appendFile(distPath, sourceMapComment);
-
-        // ソースマップを別ファイルに書き込み
-        await fs.writeFile(mapPath, JSON.stringify(result.sourceMap));
-
-        // 成功メッセージを表示
-        console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
-      } catch (err) {
-        // コンパイル エラーが発生した場合はエラーメッセージを表示
-        console.error(`${chalk.red("Error:")} Failed to compile ${srcPath}: ${err}`);
-      }
-    }
-  } catch (err) {
-    // その他のエラーが発生した場合はエラーメッセージを表示して終了
-    console.error(`${chalk.red("Error:")} ${err}`);
-    process.exit(1);
-  }
-};
 // ファイルの変更を処理する関数
-const handleChange = (changedFilePath) => {
-  // 変更されたファイルのディレクトリを取得
-  const changedDirPath = path.dirname(changedFilePath);
+const handleChange = async (changedFilePath) => {
+  try {
+    // 変更されたファイルのディレクトリを取得
+    const changedDirPath = path.dirname(changedFilePath);
 
-  // インデックス ファイルを生成
-  generateIndexFiles(changedDirPath)
-    .then(() => {
-      // インデックス ファイルの生成に成功したことを示すメッセージを表示
-      console.log(chalk.green(`[Success] Index files created successfully for ${changedDirPath}.`));
-      // SCSS ファイルをコンパイル
-      return compileScss(srcDir, distDir);
-    })
-    .then(() => {
-      // SCSS コンパイルの完了メッセージを表示
-      console.log(chalk.green("[Success] SCSS compilation completed."));
-    })
-    .catch((err) => {
-      // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
-      console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
-    });
+    // インデックス ファイルを生成
+    await generateIndexFiles(changedDirPath);
+
+    // インデックス ファイルの生成に成功したことを示すメッセージを表示
+    console.log(chalk.green(`[Success] Index files created successfully for ${changedDirPath}.`));
+
+    // SCSS ファイルをコンパイル
+    await scssCompiler.compile();
+
+    // SCSS コンパイルの完了メッセージを表示
+    console.log(chalk.green("[Success] SCSS compilation completed."));
+  } catch (err) {
+    // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
+    console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
+  }
 };
 
 // ファイルの監視を開始する関数
@@ -146,10 +84,9 @@ try {
   console.log(chalk.green("[Success] Index files created successfully."));
 
   // SCSS ファイルをコンパイル
-  await compileScss(srcDir, distDir);
-  // SCSS コンパイルの完了メッセージを表示
-  console.log(chalk.green("[Success] SCSS compilation completed."));
+  await scssCompiler.compile();
 
+  // ファイルの監視を開始
   watchFiles();
 } catch (err) {
   // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
