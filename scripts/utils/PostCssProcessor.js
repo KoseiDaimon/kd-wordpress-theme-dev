@@ -11,7 +11,6 @@ export default class PostCssProcessor {
     this.srcDir = srcDir;
     // distDirが指定されていない場合は、srcDirと同じディレクトリに設定
     this.distDir = distDir || srcDir;
-
     // PostCSSプラグインを設定
     this.postcssPlugins = [
       autoprefixer,
@@ -23,6 +22,9 @@ export default class PostCssProcessor {
 
   async processCSS() {
     try {
+      // distDirが存在しない場合は作成
+      await fs.mkdir(this.distDir, { recursive: true });
+
       const files = await fs.readdir(this.srcDir);
       for (const file of files) {
         const srcPath = path.join(this.srcDir, file);
