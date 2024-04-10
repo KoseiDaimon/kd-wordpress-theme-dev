@@ -71,7 +71,7 @@ export default class ScssProcessor {
     }
   }
 
-  async compile(options = {}) {
+  async compileFiles(options = {}) {
     const { sourceMap = false } = options;
 
     try {

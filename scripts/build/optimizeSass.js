@@ -24,10 +24,10 @@ const cleanCssProcessor = new CleanCssProcessor(distDir);
     await scssProcessor.generateIndexFiles();
 
     // SCSSをコンパイル
-    await scssProcessor.compile();
+    await scssProcessor.compileFiles();
 
     // CSSを最適化
-    await postCssProcessor.processCSS();
+    await postCssProcessor.optimizeCssFiles();
 
     // CSSを圧縮
     cleanCssProcessor.minifyCssFiles();

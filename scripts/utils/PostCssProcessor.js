@@ -20,7 +20,7 @@ export default class PostCssProcessor {
     ];
   }
 
-  async processCSS() {
+  async optimizeCssFiles() {
     try {
       // distDirが存在しない場合は作成
       await fs.mkdir(this.distDir, { recursive: true });
