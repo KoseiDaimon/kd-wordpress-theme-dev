@@ -39,12 +39,28 @@ const compileScss = async (srcDir, distDir) => {
       const distFileName = path.basename(srcPath, ".scss") + ".css";
       // 出力先の CSS ファイルのパスを作成
       const distPath = path.join(distDir, distFileName);
+      // 出力先のソースマップファイル名を作成
+      const mapFileName = path.basename(srcPath, ".scss") + ".css.map";
+      // 出力先のソースマップファイルのパスを作成
+      const mapPath = path.join(distDir, mapFileName);
 
       try {
-        // SCSS ファイルをコンパイル
-        const result = await sass.compileAsync(srcPath);
+        // SCSS ファイルをコンパイル (ソースマップを生成)
+        const result = await sass.compileAsync(srcPath, {
+          sourceMap: mapPath,
+          sourceMapContents: true,
+        });
+
         // コンパイル結果を CSS ファイルに書き込み
         await fs.writeFile(distPath, result.css);
+
+        // ソースマップのコメントを CSS ファイルに追加
+        const sourceMapComment = `/*# sourceMappingURL=${mapFileName} */`;
+        await fs.appendFile(distPath, sourceMapComment);
+
+        // ソースマップを別ファイルに書き込み
+        await fs.writeFile(mapPath, JSON.stringify(result.sourceMap));
+
         // 成功メッセージを表示
         console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
       } catch (err) {
@@ -81,55 +97,62 @@ const handleChange = (changedFilePath) => {
     });
 };
 
-// ファイル監視のためのオプションを設定
-const watcher = chokidar.watch(srcDir, {
-  ignored: [/(^|[/\\])\../, /_index\.scss$/, /\.css$/],
-  persistent: true,
-  ignoreInitial: true,
-});
-
-// ファイルの変更イベントを監視
-watcher.on("change", (path) => {
-  // ファイル変更検出メッセージを表示
-  console.log(`${chalk.blue("Change detected:")} ${path}`);
-  // 変更されたファイルを処理
-  handleChange(path);
-});
-
-// ファイルの追加イベントを監視
-watcher.on("add", (path) => {
-  // ファイル追加メッセージを表示
-  console.log(`${chalk.blue("File added:")} ${path}`);
-  // 追加されたファイルを処理
-  handleChange(path);
-});
-
-// ファイルの削除イベントを監視
-watcher.on("unlink", (path) => {
-  // ファイル削除メッセージを表示
-  console.log(`${chalk.blue("File removed:")} ${path}`);
-  // 削除されたファイルを処理
-  handleChange(path);
-});
-
-// 即時実行関数 (IIFE) でスクリプトを実行
-(async () => {
+// ファイルの監視を開始する関数
+const watchFiles = () => {
   try {
-    // インデックス ファイルを生成
-    await generateIndexFiles(srcDir);
-    // インデックス ファイルの生成成功メッセージを表示
-    console.log(chalk.green("[Success] Index files created successfully."));
+    // ファイル監視のためのオプションを設定
+    const watcher = chokidar.watch(srcDir, {
+      ignored: [/(^|[/\\])\../, /_index\.scss$/, /\.css$/],
+      persistent: true,
+      ignoreInitial: true,
+    });
 
-    // SCSS ファイルをコンパイル
-    await compileScss(srcDir, distDir);
-    // SCSS コンパイルの完了メッセージを表示
-    console.log(chalk.green("[Success] SCSS compilation completed."));
+    // ファイルの変更イベントを監視
+    watcher.on("change", (path) => {
+      // ファイル変更検出メッセージを表示
+      console.log(`${chalk.blue("Change detected:")} ${path}`);
+      // 変更されたファイルを処理
+      handleChange(path);
+    });
+
+    // ファイルの追加イベントを監視
+    watcher.on("add", (path) => {
+      // ファイル追加メッセージを表示
+      console.log(`${chalk.blue("File added:")} ${path}`);
+      // 追加されたファイルを処理
+      handleChange(path);
+    });
+
+    // ファイルの削除イベントを監視
+    watcher.on("unlink", (path) => {
+      // ファイル削除メッセージを表示
+      console.log(`${chalk.blue("File removed:")} ${path}`);
+      // 削除されたファイルを処理
+      handleChange(path);
+    });
 
     // ファイル監視の開始メッセージを表示
     console.log(chalk.blue("Watching SCSS for changes..."));
   } catch (err) {
-    // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
-    console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
+    console.error(`${chalk.red("Error:")} Failed to start file watcher: ${err}`);
     process.exit(1);
   }
-})();
+};
+
+try {
+  // インデックス ファイルを生成
+  await generateIndexFiles(srcDir);
+  // インデックス ファイルの生成成功メッセージを表示
+  console.log(chalk.green("[Success] Index files created successfully."));
+
+  // SCSS ファイルをコンパイル
+  await compileScss(srcDir, distDir);
+  // SCSS コンパイルの完了メッセージを表示
+  console.log(chalk.green("[Success] SCSS compilation completed."));
+
+  watchFiles();
+} catch (err) {
+  // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
+  console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
+  process.exit(1);
+}

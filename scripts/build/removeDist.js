@@ -19,7 +19,6 @@ try {
   } else {
     // その他のエラーが発生した場合のメッセージを表示
     console.error(`${chalk.red("Error:")} Error removing directory ${distDir}`);
-
     // エラーの詳細を表示
     console.error(err);
   }
