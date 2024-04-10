@@ -2,15 +2,14 @@
 import path from "path";
 import chalk from "chalk";
 import chokidar from "chokidar";
-import { generateIndexFiles } from "../utils/generateIndexFiles.js";
-import ScssCompiler from "../utils/ScssCompiler.js";
+import ScssProcessor from "../utils/ScssProcessor.js";
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
 const srcDir = "./src/scss";
 const distDir = "./assets/css";
 
-// ScssCompiler インスタンスを作成
-const scssCompiler = new ScssCompiler(srcDir, distDir);
+// ScssProcessor インスタンスを作成
+const scssProcessor = new ScssProcessor(srcDir, distDir);
 
 // ファイルの変更を処理する関数
 const handleChange = async (changedFilePath) => {
@@ -19,13 +18,13 @@ const handleChange = async (changedFilePath) => {
     const changedDirPath = path.dirname(changedFilePath);
 
     // インデックス ファイルを生成
-    await generateIndexFiles(changedDirPath);
+    await scssProcessor.generateIndexFiles(changedDirPath);
 
     // インデックス ファイルの生成に成功したことを示すメッセージを表示
     console.log(chalk.green(`[Success] Index files created successfully for ${changedDirPath}.`));
 
     // SCSS ファイルをコンパイル
-    await scssCompiler.compile();
+    await scssProcessor.compile();
 
     // SCSS コンパイルの完了メッセージを表示
     console.log(chalk.green("[Success] SCSS compilation completed."));
@@ -79,12 +78,13 @@ const watchFiles = () => {
 
 try {
   // インデックス ファイルを生成
-  await generateIndexFiles(srcDir);
+  await scssProcessor.generateIndexFiles();
+
   // インデックス ファイルの生成成功メッセージを表示
   console.log(chalk.green("[Success] Index files created successfully."));
 
   // SCSS ファイルをコンパイル
-  await scssCompiler.compile();
+  await scssProcessor.compile();
 
   // ファイルの監視を開始
   watchFiles();
