@@ -1,4 +1,4 @@
-// scripts/optimizeSass.js
+// scripts/dev/compileSass.js
 import * as sass from "sass";
 import path from "path";
 import fs from "fs/promises";
@@ -6,9 +6,6 @@ import { glob } from "glob";
 import chalk from "chalk";
 import chokidar from "chokidar";
 import { generateIndexFiles } from "../common/generateIndexFiles.js";
-
-// コマンドライン引数に "--watch" が含まれているかどうかを確認
-const watch = process.argv.includes("--watch");
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
 const srcDir = "./src/scss";
@@ -61,7 +58,6 @@ const compileScss = async (srcDir, distDir) => {
     process.exit(1);
   }
 };
-
 // ファイルの変更を処理する関数
 const handleChange = (changedFilePath) => {
   // 変更されたファイルのディレクトリを取得
@@ -85,6 +81,37 @@ const handleChange = (changedFilePath) => {
     });
 };
 
+// ファイル監視のためのオプションを設定
+const watcher = chokidar.watch(srcDir, {
+  ignored: [/(^|[/\\])\../, /_index\.scss$/, /\.css$/],
+  persistent: true,
+  ignoreInitial: true,
+});
+
+// ファイルの変更イベントを監視
+watcher.on("change", (path) => {
+  // ファイル変更検出メッセージを表示
+  console.log(`${chalk.blue("Change detected:")} ${path}`);
+  // 変更されたファイルを処理
+  handleChange(path);
+});
+
+// ファイルの追加イベントを監視
+watcher.on("add", (path) => {
+  // ファイル追加メッセージを表示
+  console.log(`${chalk.blue("File added:")} ${path}`);
+  // 追加されたファイルを処理
+  handleChange(path);
+});
+
+// ファイルの削除イベントを監視
+watcher.on("unlink", (path) => {
+  // ファイル削除メッセージを表示
+  console.log(`${chalk.blue("File removed:")} ${path}`);
+  // 削除されたファイルを処理
+  handleChange(path);
+});
+
 // 即時実行関数 (IIFE) でスクリプトを実行
 (async () => {
   try {
@@ -98,42 +125,8 @@ const handleChange = (changedFilePath) => {
     // SCSS コンパイルの完了メッセージを表示
     console.log(chalk.green("[Success] SCSS compilation completed."));
 
-    // "--watch" オプションが指定されている場合
-    if (watch) {
-      // ファイル監視のためのオプションを設定
-      const watcher = chokidar.watch(srcDir, {
-        ignored: [/(^|[/\\])\../, /_index\.scss$/, /\.css$/],
-        persistent: true,
-        ignoreInitial: true,
-      });
-
-      // ファイルの変更イベントを監視
-      watcher.on("change", (path) => {
-        // ファイル変更検出メッセージを表示
-        console.log(`${chalk.blue("Change detected:")} ${path}`);
-        // 変更されたファイルを処理
-        handleChange(path);
-      });
-
-      // ファイルの追加イベントを監視
-      watcher.on("add", (path) => {
-        // ファイル追加メッセージを表示
-        console.log(`${chalk.blue("File added:")} ${path}`);
-        // 追加されたファイルを処理
-        handleChange(path);
-      });
-
-      // ファイルの削除イベントを監視
-      watcher.on("unlink", (path) => {
-        // ファイル削除メッセージを表示
-        console.log(`${chalk.blue("File removed:")} ${path}`);
-        // 削除されたファイルを処理
-        handleChange(path);
-      });
-
-      // ファイル監視の開始メッセージを表示
-      console.log(chalk.blue("Watching SCSS for changes..."));
-    }
+    // ファイル監視の開始メッセージを表示
+    console.log(chalk.blue("Watching SCSS for changes..."));
   } catch (err) {
     // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
