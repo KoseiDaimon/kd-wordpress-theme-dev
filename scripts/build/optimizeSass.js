@@ -96,7 +96,7 @@ const compileScss = async (srcDir, distDir) => {
     await scssProcessor.generateIndexFiles();
 
     // SCSSをコンパイル
-    await compileScss(srcDir, distDir);
+    await scssProcessor.compile();
     console.log(chalk.green("[Success] SCSS compilation completed."));
   } catch (err) {
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);

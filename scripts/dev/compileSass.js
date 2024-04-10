@@ -24,7 +24,7 @@ const handleChange = async (changedFilePath) => {
     console.log(chalk.green(`[Success] Index files created successfully for ${changedDirPath}.`));
 
     // SCSS ファイルをコンパイル
-    await scssProcessor.compile();
+    await scssProcessor.compile({ sourceMap: true });
 
     // SCSS コンパイルの完了メッセージを表示
     console.log(chalk.green("[Success] SCSS compilation completed."));
@@ -84,7 +84,7 @@ try {
   console.log(chalk.green("[Success] Index files created successfully."));
 
   // SCSS ファイルをコンパイル
-  await scssProcessor.compile();
+  await scssProcessor.compile({ sourceMap: true });
 
   // ファイルの監視を開始
   watchFiles();

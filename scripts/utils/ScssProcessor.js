@@ -20,7 +20,6 @@ export default class ScssProcessor {
     this.srcDir = srcDir;
     this.distDir = distDir;
   }
-
   // インデックスファイルを生成するメソッド
   async generateIndexFiles(dir = this.srcDir) {
     try {
@@ -72,7 +71,9 @@ export default class ScssProcessor {
     }
   }
 
-  async compile() {
+  async compile(options = {}) {
+    const { sourceMap = false } = options;
+
     try {
       // SCSS ファイルのパスパターンを作成
       const srcGlob = path.join(this.srcDir, "**", "*.scss").replace(/\\/g, "/");
@@ -104,19 +105,25 @@ export default class ScssProcessor {
           const mapPath = path.join(this.distDir, mapFileName);
 
           try {
-            // SCSS ファイルをコンパイル (ソースマップを生成)
-            const result = await sass.compileAsync(srcPath, {
-              sourceMap: mapPath,
-              sourceMapContents: true,
-            });
+            // ソースマップの設定を決定
+            const sourceMapOptions = {
+              sourceMap: sourceMap,
+            };
+
+            // SCSS ファイルをコンパイル
+            const result = await sass.compileAsync(srcPath, sourceMapOptions);
 
             // コンパイル結果を CSS ファイルに書き込み
             await fs.writeFile(distPath, result.css);
-            // ソースマップのコメントを CSS ファイルに追加
-            const sourceMapComment = `/*# sourceMappingURL=${mapFileName} */`;
-            await fs.appendFile(distPath, sourceMapComment);
-            // ソースマップを別ファイルに書き込み
-            await fs.writeFile(mapPath, JSON.stringify(result.sourceMap));
+
+            // ソースマップが有効な場合はソースマップを処理
+            if (sourceMap) {
+              // ソースマップのコメントを CSS ファイルに追加
+              const sourceMapComment = `/*# sourceMappingURL=${mapFileName} */`;
+              await fs.appendFile(distPath, sourceMapComment);
+              // ソースマップを別ファイルに書き込み
+              await fs.writeFile(mapPath, JSON.stringify(result.sourceMap));
+            }
 
             // 成功メッセージを表示
             console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
