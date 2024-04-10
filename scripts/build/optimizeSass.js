@@ -4,13 +4,23 @@ import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
 import { generateIndexFiles } from "../common/generateIndexFiles.js";
+import postcss from "postcss";
+import autoprefixer from "autoprefixer";
+import postcssSortMediaQueries from "postcss-sort-media-queries";
+import cssDeclarationSorter from "css-declaration-sorter";
+import postcssNormalizeCharset from "postcss-normalize-charset";
 import CleanCSS from "clean-css";
 
-// SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
 const srcDir = "./src/scss";
 const distDir = "./assets/css";
 
-// Clean CSS のインスタンスを作成
+const postcssPlugins = [
+  autoprefixer,
+  postcssSortMediaQueries,
+  cssDeclarationSorter({ order: "smacss" }),
+  postcssNormalizeCharset,
+];
+
 const cleanCSS = new CleanCSS({
   level: {
     1: {
@@ -19,64 +29,54 @@ const cleanCSS = new CleanCSS({
   },
 });
 
-// SCSS ファイルをコンパイルする関数
+const processScssFile = async (srcPath, distDir) => {
+  const distFileName = path.basename(srcPath, ".scss") + ".css";
+  const distPath = path.join(distDir, distFileName);
+
+  try {
+    const result = await sass.compileAsync(srcPath);
+    const processedCss = await postcss(postcssPlugins).process(result.css, {
+      from: srcPath,
+      to: distPath,
+    });
+    const minifiedCss = cleanCSS.minify(processedCss.css);
+    await fs.writeFile(distPath, minifiedCss.styles);
+    console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
+  } catch (err) {
+    console.error(`${chalk.red("Error:")} Failed to compile ${srcPath}: ${err}`);
+  }
+};
+
 const compileScss = async (srcDir, distDir) => {
   try {
-    // SCSS ファイルのパスパターンを作成
     const srcGlob = path.join(srcDir, "**", "*.scss").replace(/\\/g, "/");
-    // パターンにマッチする SCSS ファイルのパスを取得
     const srcPaths = await glob(srcGlob);
-    // SCSS ファイルが見つからない場合は警告を表示して関数を終了
+
     if (srcPaths.length === 0) {
       console.warn(chalk.yellow(`Warning: No SCSS files found in ${srcDir}`));
       return;
     }
-    // 出力先ディレクトリを作成 (存在しない場合)
+
     await fs.mkdir(distDir, { recursive: true });
-    // 各 SCSS ファイルに対して処理を実行
-    for (const srcPath of srcPaths) {
-      // "_" で始まるファイル (パーシャル) はスキップ
-      if (path.basename(srcPath).startsWith("_")) {
-        continue;
-      }
-      // 出力先の CSS ファイル名を作成
-      const distFileName = path.basename(srcPath, ".scss") + ".css";
-      // 出力先の CSS ファイルのパスを作成
-      const distPath = path.join(distDir, distFileName);
-      try {
-        // SCSS ファイルをコンパイル
-        const result = await sass.compileAsync(srcPath);
-        // Clean CSS で圧縮
-        const minifiedCss = cleanCSS.minify(result.css);
-        // 圧縮後の CSS を CSS ファイルに書き込み
-        await fs.writeFile(distPath, minifiedCss.styles);
-        // 成功メッセージを表示
-        console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
-      } catch (err) {
-        // コンパイル エラーが発生した場合はエラーメッセージを表示
-        console.error(`${chalk.red("Error:")} Failed to compile ${srcPath}: ${err}`);
-      }
-    }
+
+    const promises = srcPaths
+      .filter((srcPath) => !path.basename(srcPath).startsWith("_"))
+      .map((srcPath) => processScssFile(srcPath, distDir));
+
+    await Promise.all(promises);
   } catch (err) {
-    // その他のエラーが発生した場合はエラーメッセージを表示して終了
     console.error(`${chalk.red("Error:")} ${err}`);
     process.exit(1);
   }
 };
 
-// 即時実行関数 (IIFE) でスクリプトを実行
 (async () => {
   try {
-    // インデックス ファイルを生成
     await generateIndexFiles(srcDir);
-    // インデックス ファイルの生成成功メッセージを表示
     console.log(chalk.green("[Success] Index files created successfully."));
-    // SCSS ファイルをコンパイル
     await compileScss(srcDir, distDir);
-    // SCSS コンパイルの完了メッセージを表示
     console.log(chalk.green("[Success] SCSS compilation completed."));
   } catch (err) {
-    // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
     process.exit(1);
   }
