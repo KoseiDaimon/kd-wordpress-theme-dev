@@ -2,7 +2,7 @@ import { rm } from "fs/promises";
 import chalk from "chalk";
 
 // 削除対象のディレクトリを指定
-const distDir = "./assets/css";
+const distDir = "./assets";
 
 try {
   // ディレクトリを再帰的に削除

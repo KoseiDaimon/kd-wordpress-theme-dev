@@ -6,7 +6,7 @@
     "dev": "npm-run-all --parallel dev:*",
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
     "dev:sass": "node ./scripts/dev/compileSass.js",
-    "dev:js": "node ./scripts/dev/optimizeJs.js",
+    "dev:js": "node ./scripts/dev/copyJs.js",
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/build/removeDist.js",
     "build:sass": "node scripts/build/optimizeSass.js",
