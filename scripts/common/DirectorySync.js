@@ -3,11 +3,28 @@ import path from "path";
 import fs from "fs/promises";
 import chalk from "chalk";
 import chokidar from "chokidar";
+import { copyDirectory } from "./copyDirectory.js";
 
 export class DirectorySync {
   constructor(srcDir, destDir) {
     this.srcDir = srcDir;
     this.destDir = destDir;
+    this.initialSync();
+  }
+
+  async initialSync() {
+    try {
+      // ディストリビューションディレクトリを削除
+      await fs.rm(this.destDir, { recursive: true, force: true });
+      console.log(chalk.blue("Deleted distribution directory."));
+
+      // ソースディレクトリの内容をコピー
+      await copyDirectory(this.srcDir, this.destDir);
+      console.log(chalk.green("Initial sync completed successfully."));
+    } catch (err) {
+      console.error(`${chalk.red("Error:")} Failed to perform initial sync: ${err}`);
+      process.exit(1);
+    }
   }
 
   async syncDir(event, eventPath) {
