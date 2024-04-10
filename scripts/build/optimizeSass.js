@@ -4,17 +4,20 @@ import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
 import chalk from "chalk";
-import { generateIndexFiles } from "../utils/generateIndexFiles.js";
 import postcss from "postcss";
 import autoprefixer from "autoprefixer";
 import postcssSortMediaQueries from "postcss-sort-media-queries";
 import cssDeclarationSorter from "css-declaration-sorter";
 import postcssNormalizeCharset from "postcss-normalize-charset";
 import CleanCSS from "clean-css";
+import ScssProcessor from "../utils/ScssProcessor.js";
 
 // ソースディレクトリと出力ディレクトリを設定
 const srcDir = "./src/scss";
 const distDir = "./assets/css";
+
+// ScssProcessor インスタンスを作成
+const scssProcessor = new ScssProcessor(srcDir, distDir);
 
 // PostCSSプラグインを設定
 const postcssPlugins = [
@@ -90,8 +93,7 @@ const compileScss = async (srcDir, distDir) => {
 (async () => {
   try {
     // インデックスファイルを生成
-    await generateIndexFiles(srcDir);
-    console.log(chalk.green("[Success] Index files created successfully."));
+    await scssProcessor.generateIndexFiles();
 
     // SCSSをコンパイル
     await compileScss(srcDir, distDir);
