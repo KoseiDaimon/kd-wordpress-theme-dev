@@ -4,12 +4,6 @@ import fs from "fs/promises";
 import chalk from "chalk";
 import { glob } from "glob";
 
-// SCSS パーシャルファイルかどうかを判定する関数
-const isScssPartial = (fileName) => {
-  // ファイル名が ".scss" で終わり、"_" で始まり、"_index.scss" ではない場合、SCSS パーシャルファイルと判定
-  return fileName.endsWith(".scss") && fileName.startsWith("_") && fileName !== "_index.scss";
-};
-
 // インデックスファイルの内容を生成する関数
 const createIndexContent = (scssFiles) => {
   // インデックスファイルの内容を配列で作成
