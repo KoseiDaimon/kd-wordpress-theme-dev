@@ -1,9 +1,9 @@
-// scripts/build/optimizeJs.js
 import * as terser from "terser";
 import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
-import chalk from "chalk";
+import { config } from "../../config.js";
+import Logger from "../utils/Logger.js";
 
 // ソースのディレクトリと、出力先ディレクトリを設定
 const srcDir = "./src/js";
@@ -18,7 +18,7 @@ const optimizeJs = async (srcDir, distDir) => {
 
     // ソースディレクトリ内にJavaScriptファイルがない場合は警告を表示して処理を終了
     if (srcPaths.length === 0) {
-      console.warn(chalk.yellow(`Warning: No JavaScript files found in ${srcDir}`));
+      Logger.log("WARN", `No JavaScript files found in ${srcDir}`);
       return;
     }
 
@@ -30,47 +30,46 @@ const optimizeJs = async (srcDir, distDir) => {
       try {
         // ファイルの内容を読み込む
         const srcCode = await fs.readFile(srcPath, "utf-8");
+
         // JavaScriptコードを最適化
         const result = await terser.minify(srcCode, {
           ecma: 2020,
-          compress: {
-            passes: 5,
-          },
+          compress: { passes: 5 },
           mangle: true,
         });
 
         // 最適化に失敗した場合はエラーメッセージを表示して次のファイルに進む
         if (result.error) {
-          console.error(`${chalk.red("Error:")} Failed to optimize ${srcPath}: ${result.error}`);
+          Logger.log("ERROR", `Failed to optimize ${srcPath}: ${result.error}`);
           continue;
         }
 
         // 出力先ファイル名を取得
         const distFileName = path.basename(srcPath);
+
         // 出力先ファイルのパスを生成
         const distPath = path.join(distDir, distFileName);
+
         // 最適化されたコードを出力先ディレクトリに書き込む
         await fs.writeFile(distPath, result.code);
 
         // 成功メッセージと最適化後のファイルサイズを表示
-        console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
-        console.log(
-          chalk.green("File size: ") + chalk.bold(`${(result.code.length / 1024).toFixed(2)} KB`)
-        );
+        Logger.log("INFO", `${srcPath} -> ${distPath}`);
+        Logger.log("INFO", `File size: ${(result.code.length / 1024).toFixed(2)} KB`);
       } catch (err) {
-        console.error(`${chalk.red("Error:")} Failed to optimize ${srcPath}: ${err}`);
+        Logger.log("ERROR", `Failed to optimize ${srcPath}: ${err}`);
       }
     }
   } catch (err) {
-    console.error(`${chalk.red("Error:")} ${err}`);
+    Logger.log("ERROR", err);
     throw err;
   }
 };
 
 try {
   await optimizeJs(srcDir, distDir);
-  console.log(chalk.green("JavaScript files optimized successfully."));
+  Logger.log("INFO", "JavaScript files optimized successfully.");
 } catch (err) {
-  console.error(`${chalk.red("Error:")} ${err}`);
+  Logger.log("ERROR", err);
   throw err;
 }
