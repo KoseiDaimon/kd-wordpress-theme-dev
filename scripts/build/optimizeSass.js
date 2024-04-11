@@ -5,8 +5,8 @@ import PostCssProcessor from "../utils/PostCssProcessor.js";
 import CleanCssProcessor from "../utils/CleanCssProcessor.js";
 
 // ソースディレクトリと出力ディレクトリを設定
-const srcDir = "./src/scss";
-const distDir = "./assets/css";
+const srcDir = config.src.sass;
+const distDir = config.dist.css;
 
 // ScssProcessor インスタンスを作成
 const scssProcessor = new ScssProcessor(srcDir, distDir);

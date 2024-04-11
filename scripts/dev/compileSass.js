@@ -1,13 +1,13 @@
 // scripts/dev/compileSass.js
 import path from "path";
-import chalk from "chalk";
 import chokidar from "chokidar";
 import ScssProcessor from "../utils/ScssProcessor.js";
 import Logger from "../utils/Logger.js";
+import { config } from "../../config.js";
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
-const srcDir = "./src/scss";
-const distDir = "./assets/css";
+const srcDir = config.src.sass;
+const distDir = config.dist.css;
 
 // ScssProcessor インスタンスを作成
 const scssProcessor = new ScssProcessor(srcDir, distDir);

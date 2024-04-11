@@ -5,8 +5,8 @@ import { glob } from "glob";
 import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 
-const srcDir = "./src/images";
-const distDir = "./assets/images";
+const srcDir = config.src.images;
+const distDir = config.dist.images;
 const supportedFormats = ["jpg", "jpeg", "png", "webp"];
 
 // 画像ファイルのパスパターンを作成

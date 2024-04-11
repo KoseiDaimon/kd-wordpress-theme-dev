@@ -6,8 +6,8 @@ import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 
 // ソースのディレクトリと、出力先ディレクトリを設定
-const srcDir = "./src/js";
-const distDir = "./assets/js";
+const srcDir = config.src.js;
+const distDir = config.dist.js;
 
 // JavaScriptファイルを最適化する関数
 const optimizeJs = async (srcDir, distDir) => {
