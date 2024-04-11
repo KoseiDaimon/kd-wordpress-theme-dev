@@ -25,7 +25,7 @@ const copyDirectory = async (srcDir, distDir) => {
   try {
     // ソースディレクトリ内のすべてのファイルとディレクトリのパスを取得
     const srcGlob = path.join(srcDir, "**", "*").replace(/\\/g, "/");
-    const srcPaths = await glob(srcGlob);
+    const srcPaths = await glob(srcGlob, { nodir: true });
 
     // ソースディレクトリ内にファイルがない場合は警告を表示して処理を終了
     if (srcPaths.length === 0) {
@@ -44,13 +44,7 @@ const copyDirectory = async (srcDir, distDir) => {
       // 出力先ファイルのパスを生成
       const distPath = path.join(distDir, path.relative(srcDir, srcPath));
 
-      if (stats.isDirectory()) {
-        // ディレクトリの場合は再帰的にコピー
-        await copyDirectory(srcPath, distPath);
-      } else {
-        // ファイルの場合はコピー
-        await copyFile(srcPath, distPath);
-      }
+      await copyFile(srcPath, distPath);
     }
   } catch (err) {
     console.error(`${chalk.red("Error:")} ${err}`);
