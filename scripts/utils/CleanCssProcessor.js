@@ -41,7 +41,6 @@ export default class CleanCssProcessor {
     try {
       // distDirが存在しない場合は作成
       await this.createDistDir();
-
       // srcDir内の全てのCSSファイルを処理
       const files = await fs.readdir(this.srcDir);
       for (const file of files) {
@@ -49,9 +48,14 @@ export default class CleanCssProcessor {
           const srcFile = path.join(this.srcDir, file);
           const distFile = path.join(this.distDir, file);
           const css = await fs.readFile(srcFile, "utf8");
+          const srcSize = Buffer.byteLength(css, "utf8") / 1024; // 圧縮前のサイズ(KB)
           const minifiedCss = await this.minifyCSS(css);
+          const distSize = Buffer.byteLength(minifiedCss, "utf8") / 1024; // 圧縮後のサイズ(KB)
           await fs.writeFile(distFile, minifiedCss);
-          Logger.log("INFO", `Minified ${srcFile} -> ${distFile}`);
+          Logger.log(
+            "INFO",
+            `Minified ${srcFile}(${srcSize.toFixed(2)}KB) -> ${distFile}(${distSize.toFixed(2)}KB)`
+          );
         }
       }
     } catch (err) {

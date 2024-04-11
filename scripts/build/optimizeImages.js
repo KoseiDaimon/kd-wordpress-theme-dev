@@ -31,19 +31,27 @@ try {
       // 出力先ディレクトリを作成 (存在しない場合)
       await fs.mkdir(path.dirname(distPath), { recursive: true });
 
+      // 圧縮前のファイルサイズを取得
+      const srcSize = (await fs.stat(srcPath)).size;
+
       // 画像を最適化して出力する
-      sharp(srcPath)
+      await sharp(srcPath)
         .resize({ width: 800, withoutEnlargement: true })
         .toFormat(fileExt === "jpg" || fileExt === "jpeg" ? "jpeg" : fileExt, {
           quality: 80,
         })
-        .toFile(distPath)
-        .then(() => {
-          Logger.log("INFO", `Optimized image ${srcPath} -> ${distPath}`);
-        })
-        .catch((err) => {
-          Logger.log("ERROR", `Error occurred while optimizing ${relPath}:`, err);
-        });
+        .toFile(distPath);
+
+      // 圧縮後のファイルサイズを取得
+      const distSize = (await fs.stat(distPath)).size;
+
+      // 圧縮前と後のファイルサイズを表示
+      Logger.log(
+        "INFO",
+        `Optimized ${srcPath}(${(srcSize / 1024).toFixed(2)}KB) -> ${distPath}(${(
+          distSize / 1024
+        ).toFixed(2)}KB)`
+      );
     }
   }
 } catch (err) {
