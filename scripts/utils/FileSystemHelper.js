@@ -34,7 +34,7 @@ export default class FileSystemHelper {
     try {
       // ディストリビューションディレクトリを削除
       await fs.rm(this.distPath, { recursive: true, force: true });
-      Logger.log("INFO", "Deleted distribution directory.");
+      Logger.log("INFO", `Deleted Directory: ${this.distPath}`);
 
       // ソースディレクトリの内容をコピー
       await this.copyDir(this.srcPath, this.distPath);
@@ -100,7 +100,7 @@ export default class FileSystemHelper {
         Logger.log("DEBUG", `File removed: ${path}`);
         this.syncDir("unlink", path);
       });
-      Logger.log("INFO", "Watching files for changes...");
+      Logger.log("INFO", `Watching files in ${this.srcPath} for changes...`);
     } catch (err) {
       Logger.log("ERROR", `Failed to start file watcher: ${err}`);
       throw err;

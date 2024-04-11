@@ -70,7 +70,7 @@ const watchFiles = () => {
     });
 
     // ファイル監視の開始メッセージを表示
-    Logger.log("INFO", "Watching SCSS for changes...");
+    Logger.log("INFO", `Watching files in ${srcDir} for changes...`);
   } catch (err) {
     Logger.log("ERROR", `Failed to start file watcher: ${err}`);
     throw err;
@@ -80,9 +80,6 @@ const watchFiles = () => {
 try {
   // インデックス ファイルを生成
   await scssProcessor.generateIndexFiles();
-
-  // インデックス ファイルの生成成功メッセージを表示
-  Logger.log("INFO", "Index files created successfully.");
 
   // SCSS ファイルをコンパイル
   await scssProcessor.compileFiles({ sourceMap: true });
