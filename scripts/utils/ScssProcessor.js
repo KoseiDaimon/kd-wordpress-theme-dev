@@ -79,7 +79,7 @@ export default class ScssProcessor {
       const srcGlob = path.join(this.srcDir, "**", "*.scss").replace(/\\/g, "/");
 
       // パターンにマッチする SCSS ファイルのパスを取得
-      const srcPaths = await glob(srcGlob);
+      const srcPaths = await glob(srcGlob, { nodir: true });
 
       // SCSS ファイルが見つからない場合は警告を表示して関数を終了
       if (srcPaths.length === 0) {

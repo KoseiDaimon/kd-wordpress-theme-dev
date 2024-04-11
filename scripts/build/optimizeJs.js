@@ -14,7 +14,7 @@ const optimizeJs = async (srcDir, distDir) => {
   try {
     // ソースディレクトリ内のすべてのJavaScriptファイルのパスを取得
     const srcGlob = path.join(srcDir, "**", "*.js").replace(/\\/g, "/");
-    const srcPaths = await glob(srcGlob);
+    const srcPaths = await glob(srcGlob, { nodir: true });
 
     // ソースディレクトリ内にJavaScriptファイルがない場合は警告を表示して処理を終了
     if (srcPaths.length === 0) {
