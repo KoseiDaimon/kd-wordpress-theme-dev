@@ -7,6 +7,9 @@ import PostCssProcessor from "../utils/PostCssProcessor.js";
 const srcDir = config.src.sass;
 const distDir = config.dist.css;
 
+// 圧縮するかどうか取得
+const minifyCss = config.options.minifyCss !== false;
+
 // ScssProcessor インスタンスを作成
 const scssProcessor = new ScssProcessor(srcDir, distDir);
 
@@ -25,8 +28,10 @@ const postCssProcessor = new PostCssProcessor(distDir);
     // CSSを最適化
     await postCssProcessor.optimizeCssFiles();
 
-    // CSSを圧縮
-    await postCssProcessor.minifyCssFiles();
+    if (minifyCss) {
+      // CSSを圧縮
+      await postCssProcessor.minifyCssFiles();
+    }
   } catch (err) {
     Logger.log("ERROR", "Error creating index files or compiling SCSS:", err);
     throw err;

@@ -11,6 +11,6 @@ export const config = {
   },
   options: {
     logLevel: "debug",
-    sassOutputStyle: "compressed",
+    minifyCss: true,
   },
 };
