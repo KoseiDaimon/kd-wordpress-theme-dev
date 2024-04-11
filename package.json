@@ -7,6 +7,7 @@
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
     "dev:sass": "node ./scripts/dev/compileSass.js",
     "dev:js": "node ./scripts/dev/syncJs.js",
+    "dev:images": "node ./scripts/dev/syncImages.js",
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/build/removeDist.js",
     "build:sass": "node scripts/build/optimizeSass.js",
