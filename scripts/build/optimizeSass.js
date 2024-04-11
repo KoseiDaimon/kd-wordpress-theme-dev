@@ -14,9 +14,6 @@ const scssProcessor = new ScssProcessor(srcDir, distDir);
 // PostCssProcessor インスタンスを作成
 const postCssProcessor = new PostCssProcessor(distDir);
 
-// CleanCssProcessor インスタンスを作成
-const cleanCssProcessor = new CleanCssProcessor(distDir);
-
 // メイン処理
 (async () => {
   try {
@@ -30,7 +27,7 @@ const cleanCssProcessor = new CleanCssProcessor(distDir);
     await postCssProcessor.optimizeCssFiles();
 
     // CSSを圧縮
-    cleanCssProcessor.minifyCssFiles();
+    await postCssProcessor.minifyCssFiles();
   } catch (err) {
     Logger.log("ERROR", "Error creating index files or compiling SCSS:", err);
     throw err;
