@@ -3,6 +3,7 @@ import path from "path";
 import chalk from "chalk";
 import chokidar from "chokidar";
 import ScssProcessor from "../utils/ScssProcessor.js";
+import Logger from "../utils/Logger.js";
 
 // SCSS ファイルのディレクトリと CSS ファイルの出力先ディレクトリを設定
 const srcDir = "./src/scss";
@@ -21,16 +22,16 @@ const handleChange = async (changedFilePath) => {
     await scssProcessor.generateIndexFiles(changedDirPath);
 
     // インデックス ファイルの生成に成功したことを示すメッセージを表示
-    console.log(chalk.green(`[Success] Index files created successfully for ${changedDirPath}.`));
+    Logger.log("INFO", `Index files created successfully for ${changedDirPath}.`);
 
     // SCSS ファイルをコンパイル
     await scssProcessor.compileFiles({ sourceMap: true });
 
     // SCSS コンパイルの完了メッセージを表示
-    console.log(chalk.green("[Success] SCSS compilation completed."));
+    Logger.log("INFO", "SCSS compilation completed.");
   } catch (err) {
     // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
-    console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
+    Logger.log("ERROR", "Error creating index files or compiling SCSS:", err);
   }
 };
 
@@ -47,7 +48,7 @@ const watchFiles = () => {
     // ファイルの変更イベントを監視
     watcher.on("change", (path) => {
       // ファイル変更検出メッセージを表示
-      console.log(`${chalk.blue("Change detected:")} ${path}`);
+      Logger.log("DEBUG", `Change detected: ${path}`);
       // 変更されたファイルを処理
       handleChange(path);
     });
@@ -55,7 +56,7 @@ const watchFiles = () => {
     // ファイルの追加イベントを監視
     watcher.on("add", (path) => {
       // ファイル追加メッセージを表示
-      console.log(`${chalk.blue("File added:")} ${path}`);
+      Logger.log("DEBUG", `File added: ${path}`);
       // 追加されたファイルを処理
       handleChange(path);
     });
@@ -63,16 +64,16 @@ const watchFiles = () => {
     // ファイルの削除イベントを監視
     watcher.on("unlink", (path) => {
       // ファイル削除メッセージを表示
-      console.log(`${chalk.blue("File removed:")} ${path}`);
+      Logger.log("DEBUG", `File removed: ${path}`);
       // 削除されたファイルを処理
       handleChange(path);
     });
 
     // ファイル監視の開始メッセージを表示
-    console.log(chalk.blue("Watching SCSS for changes..."));
+    Logger.log("INFO", "Watching SCSS for changes...");
   } catch (err) {
-    console.error(`${chalk.red("Error:")} Failed to start file watcher: ${err}`);
-    process.exit(1);
+    Logger.log("ERROR", `Failed to start file watcher: ${err}`);
+    throw err;
   }
 };
 
@@ -81,7 +82,7 @@ try {
   await scssProcessor.generateIndexFiles();
 
   // インデックス ファイルの生成成功メッセージを表示
-  console.log(chalk.green("[Success] Index files created successfully."));
+  Logger.log("INFO", "Index files created successfully.");
 
   // SCSS ファイルをコンパイル
   await scssProcessor.compileFiles({ sourceMap: true });
@@ -90,6 +91,6 @@ try {
   watchFiles();
 } catch (err) {
   // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
-  console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
-  process.exit(1);
+  Logger.log("ERROR", "Error creating index files or compiling SCSS:", err);
+  throw err;
 }
