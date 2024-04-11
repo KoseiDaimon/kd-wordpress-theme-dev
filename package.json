@@ -4,10 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
-    "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
     "dev:images": "node ./scripts/dev/syncImages.js",
     "dev:js": "node ./scripts/dev/syncJs.js",
     "dev:sass": "node ./scripts/dev/compileSass.js",
+    "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/build/removeDist.js",
     "build:images": "node ./scripts/build/optimizeImages.js",
