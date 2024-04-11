@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
 import chokidar from "chokidar";
-import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 
 export default class FileSystemHelper {

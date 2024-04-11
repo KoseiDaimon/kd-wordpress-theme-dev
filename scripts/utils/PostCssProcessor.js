@@ -5,7 +5,6 @@ import cssDeclarationSorter from "css-declaration-sorter";
 import postcssNormalizeCharset from "postcss-normalize-charset";
 import fs from "fs/promises";
 import path from "path";
-import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 
 export default class PostCssProcessor {

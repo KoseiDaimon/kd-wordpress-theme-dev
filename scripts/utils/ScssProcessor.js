@@ -2,7 +2,6 @@ import * as sass from "sass";
 import path from "path";
 import fs from "fs/promises";
 import { glob } from "glob";
-import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 
 // SCSS プロセッサクラス
