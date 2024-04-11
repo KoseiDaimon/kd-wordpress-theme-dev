@@ -1,66 +1,45 @@
 // utils/FileSystemHelper.js
 import path from "path";
 import fs from "fs/promises";
-import { glob } from "glob";
 import chalk from "chalk";
 import chokidar from "chokidar";
 
 export default class FileSystemHelper {
-  constructor(srcDir, destDir) {
-    this.srcDir = srcDir;
-    this.destDir = destDir;
+  constructor(srcPath, distPath) {
+    this.srcPath = srcPath;
+    this.distPath = distPath;
   }
 
-  async copyFile(srcPath, distPath) {
+  async copyFile(srcFile, distFile) {
     try {
-      // ファイルの内容を読み込む
-      const srcCode = await fs.readFile(srcPath);
-
-      // 出力先ディレクトリが存在しない場合は作成
-      await fs.mkdir(path.dirname(distPath), { recursive: true });
-
-      // ファイルを出力先ディレクトリに書き込む
-      await fs.writeFile(distPath, srcCode);
-      console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
+      await fs.cp(srcFile, distFile);
+      console.log(`${chalk.green("Success:")} Copied file ${srcFile} to ${distFile}`);
     } catch (err) {
-      throw new Error(`Failed to copy ${srcPath}: ${err}`);
+      console.error(`${chalk.red("Error:")} Failed to copy file: ${err}`);
+      throw err;
     }
   }
 
-  async copyDirectory(srcDir, distDir) {
+  async copyDir(srcDir, distDir) {
     try {
-      // ソースディレクトリ内のすべてのファイルとディレクトリのパスを取得
-      const srcGlob = path.join(srcDir, "**", "*").replace(/\\/g, "/");
-      const srcPaths = await glob(srcGlob, { nodir: true });
-
-      // ソースディレクトリ内にファイルがない場合は警告を表示して処理を終了
-      if (srcPaths.length === 0) {
-        console.warn(chalk.yellow(`Warning: No files found in ${srcDir}`));
-        return;
-      }
-
-      // 出力先ディレクトリが存在しない場合は作成
-      await fs.mkdir(distDir, { recursive: true });
-
-      // 各ファイルをコピー
-      for (const srcPath of srcPaths) {
-        const distPath = path.join(distDir, path.relative(srcDir, srcPath));
-        await this.copyFile(srcPath, distPath);
-      }
+      await fs.cp(srcDir, distDir, { recursive: true });
+      console.log(
+        `${chalk.green("Success:")} Copied directory ${srcDir} to ${chalk.magenta(distDir)}`
+      );
     } catch (err) {
-      console.error(`${chalk.red("Error:")} ${err}`);
-      process.exit(1);
+      console.error(`${chalk.red("Error:")} Failed to copy directory: ${err}`);
+      throw err;
     }
   }
 
   async initialSync() {
     try {
       // ディストリビューションディレクトリを削除
-      await fs.rm(this.destDir, { recursive: true, force: true });
+      await fs.rm(this.distPath, { recursive: true, force: true });
       console.log(chalk.blue("Deleted distribution directory."));
 
       // ソースディレクトリの内容をコピー
-      await this.copyDirectory(this.srcDir, this.destDir);
+      await this.copyDir(this.srcPath, this.distPath);
       console.log(chalk.green("Initial sync completed successfully."));
     } catch (err) {
       console.error(`${chalk.red("Error:")} Failed to perform initial sync: ${err}`);
@@ -69,33 +48,33 @@ export default class FileSystemHelper {
   }
 
   async syncDir(event, eventPath) {
-    let srcFile, destFile;
+    let srcFile, distFile;
     switch (event) {
       case "add":
       case "change":
         srcFile = eventPath;
-        destFile = path.resolve(this.destDir, path.relative(this.srcDir, srcFile));
-        await fs.mkdir(path.dirname(destFile), { recursive: true }).catch((err) => {
+        distFile = path.resolve(this.distPath, path.relative(this.srcPath, srcFile));
+        await fs.mkdir(path.dirname(distFile), { recursive: true }).catch((err) => {
           if (err.code !== "EEXIST") {
             throw err;
           }
         });
-        await fs.copyFile(srcFile, destFile);
+        await fs.cp(srcFile, distFile);
         console.log(
           `${chalk.green("Success:")} Copied ${path.relative(
             process.cwd(),
             srcFile
-          )} -> ${path.relative(process.cwd(), destFile)}`
+          )} -> ${path.relative(process.cwd(), distFile)}`
         );
         break;
       case "unlink":
-        destFile = path.resolve(this.destDir, path.relative(this.srcDir, eventPath));
-        await fs.unlink(destFile).catch((err) => {
+        distFile = path.resolve(this.distPath, path.relative(this.srcPath, eventPath));
+        await fs.unlink(distFile).catch((err) => {
           if (err.code !== "ENOENT") {
             throw err;
           }
         });
-        console.log(`${chalk.green("Success:")} Removed ${path.relative(process.cwd(), destFile)}`);
+        console.log(`${chalk.green("Success:")} Removed ${path.relative(process.cwd(), distFile)}`);
         break;
       default:
         break;
@@ -106,7 +85,7 @@ export default class FileSystemHelper {
     try {
       this.initialSync();
 
-      const watcher = chokidar.watch(this.srcDir, {
+      const watcher = chokidar.watch(this.srcPath, {
         ignored: [/(^|\/)\\./, /node_modules/],
         persistent: true,
         ignoreInitial: true,
