@@ -80,9 +80,9 @@ export default class FileSystemHelper {
     }
   }
 
-  watchFiles() {
+  async watchFiles() {
     try {
-      this.initialSync();
+      await this.initialSync();
       const watcher = chokidar.watch(this.srcPath, {
         ignored: [/(^|\/)\\./, /node_modules/],
         persistent: true,
