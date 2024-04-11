@@ -12,5 +12,7 @@ export const config = {
   options: {
     logLevel: "debug",
     minifyCss: true,
+    convertToWebp: true,
+    webpQuality: 80,
   },
 };
