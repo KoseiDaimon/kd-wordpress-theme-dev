@@ -31,6 +31,9 @@ const optimizeJs = async (srcDir, distDir) => {
         // ファイルの内容を読み込む
         const srcCode = await fs.readFile(srcPath, "utf-8");
 
+        // 圧縮前のファイルサイズを取得
+        const srcSize = (srcCode.length / 1024).toFixed(2);
+
         // JavaScriptコードを最適化
         const result = await terser.minify(srcCode, {
           ecma: 2020,
@@ -53,9 +56,11 @@ const optimizeJs = async (srcDir, distDir) => {
         // 最適化されたコードを出力先ディレクトリに書き込む
         await fs.writeFile(distPath, result.code);
 
-        // 成功メッセージと最適化後のファイルサイズを表示
-        Logger.log("INFO", `${srcPath} -> ${distPath}`);
-        Logger.log("INFO", `File size: ${(result.code.length / 1024).toFixed(2)} KB`);
+        // 圧縮後のファイルサイズを取得
+        const distSize = (result.code.length / 1024).toFixed(2);
+
+        // 成功メッセージと圧縮前後のファイルサイズを表示
+        Logger.log("INFO", `Optimized ${srcPath}(${srcSize}KB) -> ${distPath}(${distSize}KB)`);
       } catch (err) {
         Logger.log("ERROR", `Failed to optimize ${srcPath}: ${err}`);
       }
