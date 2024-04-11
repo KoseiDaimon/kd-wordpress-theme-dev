@@ -1,13 +1,13 @@
 export const config = {
   src: {
-    sass: "src/scss",
     images: "src/images",
     js: "src/js",
+    sass: "src/scss",
   },
   dist: {
-    css: "assets/css",
     images: "assets/images",
     js: "assets/js",
+    css: "assets/css",
   },
   options: {
     logLevel: "debug",

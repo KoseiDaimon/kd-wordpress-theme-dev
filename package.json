@@ -5,14 +5,14 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:reload": "browser-sync start --proxy \"http://localhost:8001\" --files \"./assets/**/*\",\"./*.php\"",
-    "dev:sass": "node ./scripts/dev/compileSass.js",
-    "dev:js": "node ./scripts/dev/syncJs.js",
     "dev:images": "node ./scripts/dev/syncImages.js",
+    "dev:js": "node ./scripts/dev/syncJs.js",
+    "dev:sass": "node ./scripts/dev/compileSass.js",
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/build/removeDist.js",
-    "build:sass": "node scripts/build/optimizeSass.js",
+    "build:images": "node ./scripts/build/optimizeImages.js",
     "build:js": "node ./scripts/build/optimizeJs.js",
-    "build:images": "node ./scripts/build/optimizeImages.js"
+    "build:sass": "node scripts/build/optimizeSass.js"
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",
