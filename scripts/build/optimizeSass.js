@@ -22,19 +22,15 @@ const cleanCssProcessor = new CleanCssProcessor(distDir);
   try {
     // インデックスファイルを生成
     await scssProcessor.generateIndexFiles();
-    Logger.log("INFO", "Index files created successfully.");
 
     // SCSSをコンパイル
     await scssProcessor.compileFiles();
-    Logger.log("INFO", "SCSS compilation completed.");
 
     // CSSを最適化
     await postCssProcessor.optimizeCssFiles();
-    Logger.log("INFO", "CSS optimization completed.");
 
     // CSSを圧縮
     cleanCssProcessor.minifyCssFiles();
-    Logger.log("INFO", "CSS minification completed.");
   } catch (err) {
     Logger.log("ERROR", "Error creating index files or compiling SCSS:", err);
     throw err;

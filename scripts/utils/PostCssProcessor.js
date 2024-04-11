@@ -40,8 +40,10 @@ export default class PostCssProcessor {
         });
         // 処理後のCSSを書き込み
         await fs.writeFile(distPath, processedCss.css);
-        Logger.log("INFO", `Processed: ${srcPath} -> ${distPath}`);
+        Logger.log("INFO", `Optimized: ${srcPath} -> ${distPath}`);
       }
+
+      Logger.log("INFO", "CSS optimization completed successfully.");
     } catch (err) {
       Logger.log("ERROR", `Failed to process CSS: ${err}`);
       throw err;

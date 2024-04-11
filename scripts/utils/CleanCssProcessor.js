@@ -54,10 +54,12 @@ export default class CleanCssProcessor {
           await fs.writeFile(distFile, minifiedCss);
           Logger.log(
             "INFO",
-            `Minified ${srcFile}(${srcSize.toFixed(2)}KB) -> ${distFile}(${distSize.toFixed(2)}KB)`
+            `Minified: ${srcFile}(${srcSize.toFixed(2)}KB) -> ${distFile}(${distSize.toFixed(2)}KB)`
           );
         }
       }
+
+      Logger.log("INFO", "CSS minification completed successfully.");
     } catch (err) {
       Logger.log("ERROR", `Failed to process directory: ${err}`);
       throw err;

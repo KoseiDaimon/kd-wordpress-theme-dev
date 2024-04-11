@@ -60,7 +60,7 @@ const optimizeJs = async (srcDir, distDir) => {
         const distSize = (result.code.length / 1024).toFixed(2);
 
         // 成功メッセージと圧縮前後のファイルサイズを表示
-        Logger.log("INFO", `Optimized ${srcPath}(${srcSize}KB) -> ${distPath}(${distSize}KB)`);
+        Logger.log("INFO", `Optimized: ${srcPath}(${srcSize}KB) -> ${distPath}(${distSize}KB)`);
       } catch (err) {
         Logger.log("ERROR", `Failed to optimize ${srcPath}: ${err}`);
       }

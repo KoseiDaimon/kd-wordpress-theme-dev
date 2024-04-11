@@ -12,46 +12,49 @@ export default class ScssProcessor {
     this.distDir = distDir;
   }
 
-  #createIndexContent(scssFiles) {
+  async #createIndexContent(scssFiles) {
     return [
       "// This file is generated automatically by scripts/generateIndexFiles.js",
       ...scssFiles.map((file) => `@forward "./${file.slice(0, -5)}";`),
     ].join("\n");
   }
 
-  async generateIndexFiles(dir = this.srcDir) {
-    try {
-      const files = await fs.readdir(dir);
-      const scssFiles = files.filter(
-        (file) => file.endsWith(".scss") && file.startsWith("_") && file !== "_index.scss"
-      );
+  async #generateIndexFilesRecursive(dir) {
+    const files = await fs.readdir(dir);
+    const scssFiles = files.filter(
+      (file) => file.endsWith(".scss") && file.startsWith("_") && file !== "_index.scss"
+    );
 
-      for (const file of files) {
-        const filePath = path.join(dir, file);
-        const stat = await fs.stat(filePath);
-        if (stat.isDirectory()) {
-          await this.generateIndexFiles(filePath);
-        }
+    for (const file of files) {
+      const filePath = path.join(dir, file);
+      const stat = await fs.stat(filePath);
+      if (stat.isDirectory()) {
+        await this.#generateIndexFilesRecursive(filePath);
       }
+    }
 
-      if (scssFiles.length === 0) {
-        return;
-      }
-
+    if (scssFiles.length > 0) {
       const indexFilePath = path.join(dir, "_index.scss");
       const indexContent = this.#createIndexContent(scssFiles);
 
       try {
         await fs.access(indexFilePath);
-        Logger.log("INFO", `Overwriting existing ${indexFilePath}`);
+        Logger.log("INFO", `Overwrited: ${indexFilePath}`);
       } catch {
         Logger.log("INFO", `Generating new ${indexFilePath}`);
       }
 
-      await fs.writeFile(indexFilePath, indexContent);
+      await fs.writeFile(indexFilePath, await indexContent);
+    }
+  }
+
+  async generateIndexFiles(dir = this.srcDir) {
+    try {
+      await this.#generateIndexFilesRecursive(dir);
+      Logger.log("INFO", "Index files created successfully.");
     } catch (error) {
-      Logger.log("ERROR", `Error generating index file in ${dir}`);
-      Logger.log("ERROR", error);
+      Logger.log("ERROR", `Error generating index files: ${error.message}`);
+      throw error;
     }
   }
 
@@ -110,7 +113,7 @@ export default class ScssProcessor {
             }
 
             // 成功メッセージを表示
-            Logger.log("INFO", `${srcPath} -> ${distPath}`);
+            Logger.log("INFO", `Compiled: ${srcPath} -> ${distPath}`);
           } catch (err) {
             // コンパイル エラーが発生した場合はエラーメッセージを表示
             Logger.log("ERROR", `Failed to compile ${srcPath}: ${err}`);
@@ -118,7 +121,7 @@ export default class ScssProcessor {
         }
 
         // SCSS コンパイルの完了メッセージを表示
-        Logger.log("INFO", "SCSS compilation completed.");
+        Logger.log("INFO", "SCSS compilation completed successfully.");
       }
     } catch (err) {
       // その他のエラーが発生した場合はエラーメッセージを表示して終了

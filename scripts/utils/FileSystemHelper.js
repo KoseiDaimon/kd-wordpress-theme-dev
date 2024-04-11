@@ -23,7 +23,7 @@ export default class FileSystemHelper {
   async copyDir(srcDir, distDir) {
     try {
       await fs.cp(srcDir, distDir, { recursive: true });
-      Logger.log("INFO", `Copied directory ${srcDir} to ${distDir}`);
+      Logger.log("INFO", `Copied directory: ${srcDir} to ${distDir}`);
     } catch (err) {
       Logger.log("ERROR", `Failed to copy directory: ${err}`);
       throw err;

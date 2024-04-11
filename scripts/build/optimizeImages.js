@@ -48,11 +48,13 @@ try {
       // 圧縮前と後のファイルサイズを表示
       Logger.log(
         "INFO",
-        `Optimized ${srcPath}(${(srcSize / 1024).toFixed(2)}KB) -> ${distPath}(${(
+        `Optimized: ${srcPath}(${(srcSize / 1024).toFixed(2)}KB) -> ${distPath}(${(
           distSize / 1024
         ).toFixed(2)}KB)`
       );
     }
+
+    Logger.log("INFO", "Images files optimized successfully.");
   }
 } catch (err) {
   Logger.log("ERROR", err);

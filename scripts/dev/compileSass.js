@@ -22,13 +22,13 @@ const handleChange = async (changedFilePath) => {
     await scssProcessor.generateIndexFiles(changedDirPath);
 
     // インデックス ファイルの生成に成功したことを示すメッセージを表示
-    Logger.log("INFO", `Index files created successfully for ${changedDirPath}.`);
+    Logger.log("INFO", `Created: ${changedDirPath}.`);
 
     // SCSS ファイルをコンパイル
     await scssProcessor.compileFiles({ sourceMap: true });
 
     // SCSS コンパイルの完了メッセージを表示
-    Logger.log("INFO", "SCSS compilation completed.");
+    Logger.log("INFO", "SCSS processing completed successfully.");
   } catch (err) {
     // インデックス ファイルの生成または SCSS コンパイル中にエラーが発生した場合のエラーメッセージを表示
     Logger.log("ERROR", "Error creating index files or compiling SCSS:", err);
