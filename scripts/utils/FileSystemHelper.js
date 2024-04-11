@@ -1,8 +1,8 @@
-// utils/FileSystemHelper.js
 import path from "path";
 import fs from "fs/promises";
-import chalk from "chalk";
 import chokidar from "chokidar";
+import { config } from "../../config.js";
+import Logger from "../utils/Logger.js";
 
 export default class FileSystemHelper {
   constructor(srcPath, distPath) {
@@ -13,9 +13,9 @@ export default class FileSystemHelper {
   async copyFile(srcFile, distFile) {
     try {
       await fs.cp(srcFile, distFile);
-      console.log(`${chalk.green("Success:")} Copied file ${srcFile} to ${distFile}`);
+      Logger.log("INFO", `Copied file ${srcFile} to ${distFile}`);
     } catch (err) {
-      console.error(`${chalk.red("Error:")} Failed to copy file: ${err}`);
+      Logger.log("ERROR", `Failed to copy file: ${err}`);
       throw err;
     }
   }
@@ -23,11 +23,9 @@ export default class FileSystemHelper {
   async copyDir(srcDir, distDir) {
     try {
       await fs.cp(srcDir, distDir, { recursive: true });
-      console.log(
-        `${chalk.green("Success:")} Copied directory ${srcDir} to ${chalk.magenta(distDir)}`
-      );
+      Logger.log("INFO", `Copied directory ${srcDir} to ${distDir}`);
     } catch (err) {
-      console.error(`${chalk.red("Error:")} Failed to copy directory: ${err}`);
+      Logger.log("ERROR", `Failed to copy directory: ${err}`);
       throw err;
     }
   }
@@ -36,13 +34,13 @@ export default class FileSystemHelper {
     try {
       // ディストリビューションディレクトリを削除
       await fs.rm(this.distPath, { recursive: true, force: true });
-      console.log(chalk.blue("Deleted distribution directory."));
+      Logger.log("INFO", "Deleted distribution directory.");
 
       // ソースディレクトリの内容をコピー
       await this.copyDir(this.srcPath, this.distPath);
-      console.log(chalk.green("Initial sync completed successfully."));
+      Logger.log("INFO", "Initial sync completed successfully.");
     } catch (err) {
-      console.error(`${chalk.red("Error:")} Failed to perform initial sync: ${err}`);
+      Logger.log("ERROR", `Failed to perform initial sync: ${err}`);
       throw err;
     }
   }
@@ -60,11 +58,12 @@ export default class FileSystemHelper {
           }
         });
         await fs.cp(srcFile, distFile);
-        console.log(
-          `${chalk.green("Success:")} Copied ${path.relative(
+        Logger.log(
+          "INFO",
+          `Copied ${path.relative(process.cwd(), srcFile)} -> ${path.relative(
             process.cwd(),
-            srcFile
-          )} -> ${path.relative(process.cwd(), distFile)}`
+            distFile
+          )}`
         );
         break;
       case "unlink":
@@ -74,7 +73,7 @@ export default class FileSystemHelper {
             throw err;
           }
         });
-        console.log(`${chalk.green("Success:")} Removed ${path.relative(process.cwd(), distFile)}`);
+        Logger.log("INFO", `Removed ${path.relative(process.cwd(), distFile)}`);
         break;
       default:
         break;
@@ -84,31 +83,26 @@ export default class FileSystemHelper {
   watchFiles() {
     try {
       this.initialSync();
-
       const watcher = chokidar.watch(this.srcPath, {
         ignored: [/(^|\/)\\./, /node_modules/],
         persistent: true,
         ignoreInitial: true,
       });
-
       watcher.on("change", (path) => {
-        console.log(`${chalk.blue("Change detected:")} ${path}`);
+        Logger.log("DEBUG", `Change detected: ${path}`);
         this.syncDir("change", path);
       });
-
       watcher.on("add", (path) => {
-        console.log(`${chalk.blue("File added:")} ${path}`);
+        Logger.log("DEBUG", `File added: ${path}`);
         this.syncDir("add", path);
       });
-
       watcher.on("unlink", (path) => {
-        console.log(`${chalk.blue("File removed:")} ${path}`);
+        Logger.log("DEBUG", `File removed: ${path}`);
         this.syncDir("unlink", path);
       });
-
-      console.log(chalk.blue("Watching files for changes..."));
+      Logger.log("INFO", "Watching files for changes...");
     } catch (err) {
-      console.error(`${chalk.red("Error:")} Failed to start file watcher: ${err}`);
+      Logger.log("ERROR", `Failed to start file watcher: ${err}`);
       throw err;
     }
   }

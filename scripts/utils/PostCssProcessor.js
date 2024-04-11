@@ -5,6 +5,8 @@ import cssDeclarationSorter from "css-declaration-sorter";
 import postcssNormalizeCharset from "postcss-normalize-charset";
 import fs from "fs/promises";
 import path from "path";
+import { config } from "../../config.js";
+import Logger from "../utils/Logger.js";
 
 export default class PostCssProcessor {
   constructor(srcDir, distDir = null) {
@@ -24,7 +26,6 @@ export default class PostCssProcessor {
     try {
       // distDirが存在しない場合は作成
       await fs.mkdir(this.distDir, { recursive: true });
-
       const files = await fs.readdir(this.srcDir);
       for (const file of files) {
         const srcPath = path.join(this.srcDir, file);
@@ -39,10 +40,10 @@ export default class PostCssProcessor {
         });
         // 処理後のCSSを書き込み
         await fs.writeFile(distPath, processedCss.css);
-        console.log(`Processed: ${srcPath} -> ${distPath}`);
+        Logger.log("INFO", `Processed: ${srcPath} -> ${distPath}`);
       }
     } catch (err) {
-      console.error(`[Error] Failed to process CSS: ${err}`);
+      Logger.log("ERROR", `Failed to process CSS: ${err}`);
       throw err;
     }
   }

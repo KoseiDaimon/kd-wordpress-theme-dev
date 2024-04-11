@@ -1,8 +1,9 @@
 import * as sass from "sass";
 import path from "path";
 import fs from "fs/promises";
-import chalk from "chalk";
 import { glob } from "glob";
+import { config } from "../../config.js";
+import Logger from "./Logger.js";
 
 // インデックスファイルの内容を生成する関数
 const createIndexContent = (scssFiles) => {
@@ -56,18 +57,18 @@ export default class ScssProcessor {
         // インデックスファイルが既に存在するかどうかを確認
         await fs.access(indexFilePath);
         // 既に存在する場合、上書きする旨のメッセージを表示
-        console.log(`${chalk.blue("Info:")} Overwriting existing ${indexFilePath}`);
+        Logger.log("INFO", `Overwriting existing ${indexFilePath}`);
       } catch {
         // 存在しない場合、新規作成する旨のメッセージを表示
-        console.log(`${chalk.green("Success:")} Generating new ${indexFilePath}`);
+        Logger.log("INFO", `Generating new ${indexFilePath}`);
       }
 
       // インデックスファイルを書き込む
       await fs.writeFile(indexFilePath, indexContent);
     } catch (error) {
       // エラーが発生した場合、エラーメッセージを表示
-      console.error(`${chalk.red("Error:")} Error generating index file in ${dir}`);
-      console.error(error);
+      Logger.log("ERROR", `Error generating index file in ${dir}`);
+      Logger.log("ERROR", error);
     }
   }
 
@@ -83,7 +84,7 @@ export default class ScssProcessor {
 
       // SCSS ファイルが見つからない場合は警告を表示して関数を終了
       if (srcPaths.length === 0) {
-        console.warn(chalk.yellow(`Warning: No SCSS files found in ${this.srcDir}`));
+        Logger.log("WARN", `No SCSS files found in ${this.srcDir}`);
       } else {
         // 出力先ディレクトリを作成 (存在しない場合)
         await fs.mkdir(this.distDir, { recursive: true });
@@ -126,19 +127,19 @@ export default class ScssProcessor {
             }
 
             // 成功メッセージを表示
-            console.log(`${chalk.green("Success:")} ${srcPath} -> ${distPath}`);
+            Logger.log("INFO", `${srcPath} -> ${distPath}`);
           } catch (err) {
             // コンパイル エラーが発生した場合はエラーメッセージを表示
-            console.error(`${chalk.red("Error:")} Failed to compile ${srcPath}: ${err}`);
+            Logger.log("ERROR", `Failed to compile ${srcPath}: ${err}`);
           }
         }
 
         // SCSS コンパイルの完了メッセージを表示
-        console.log(chalk.green("[Success] SCSS compilation completed."));
+        Logger.log("INFO", "SCSS compilation completed.");
       }
     } catch (err) {
       // その他のエラーが発生した場合はエラーメッセージを表示して終了
-      console.error(`${chalk.red("Error:")} ${err}`);
+      Logger.log("ERROR", err);
       throw err;
     }
   }

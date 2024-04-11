@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import CleanCSS from "clean-css";
+import Logger from "../utils/Logger.js";
 
 export default class CleanCssProcessor {
   constructor(srcDir, distDir = null) {
@@ -23,7 +24,7 @@ export default class CleanCssProcessor {
       const minifiedCss = await this.cleanCSS.minify(css);
       return minifiedCss.styles;
     } catch (err) {
-      console.error(`[Error] Failed to minify CSS: ${err}`);
+      Logger.log("ERROR", `Failed to minify CSS: ${err}`);
       throw err;
     }
   }
@@ -50,10 +51,11 @@ export default class CleanCssProcessor {
           const css = await fs.readFile(srcFile, "utf8");
           const minifiedCss = await this.minifyCSS(css);
           await fs.writeFile(distFile, minifiedCss);
+          Logger.log("INFO", `Minified ${srcFile} -> ${distFile}`);
         }
       }
     } catch (err) {
-      console.error(`[Error] Failed to process directory: ${err}`);
+      Logger.log("ERROR", `Failed to process directory: ${err}`);
       throw err;
     }
   }
