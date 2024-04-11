@@ -63,7 +63,7 @@ const optimizeJs = async (srcDir, distDir) => {
     }
   } catch (err) {
     console.error(`${chalk.red("Error:")} ${err}`);
-    process.exit(1);
+    throw err;
   }
 };
 
@@ -72,5 +72,5 @@ try {
   console.log(chalk.green("JavaScript files optimized successfully."));
 } catch (err) {
   console.error(`${chalk.red("Error:")} ${err}`);
-  process.exit(1);
+  throw err;
 }

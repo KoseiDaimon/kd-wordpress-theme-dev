@@ -43,7 +43,7 @@ export default class FileSystemHelper {
       console.log(chalk.green("Initial sync completed successfully."));
     } catch (err) {
       console.error(`${chalk.red("Error:")} Failed to perform initial sync: ${err}`);
-      process.exit(1);
+      throw err;
     }
   }
 
@@ -109,7 +109,7 @@ export default class FileSystemHelper {
       console.log(chalk.blue("Watching files for changes..."));
     } catch (err) {
       console.error(`${chalk.red("Error:")} Failed to start file watcher: ${err}`);
-      process.exit(1);
+      throw err;
     }
   }
 }

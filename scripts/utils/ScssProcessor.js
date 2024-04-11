@@ -139,7 +139,7 @@ export default class ScssProcessor {
     } catch (err) {
       // その他のエラーが発生した場合はエラーメッセージを表示して終了
       console.error(`${chalk.red("Error:")} ${err}`);
-      process.exit(1);
+      throw err;
     }
   }
 }

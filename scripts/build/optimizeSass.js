@@ -33,6 +33,6 @@ const cleanCssProcessor = new CleanCssProcessor(distDir);
     cleanCssProcessor.minifyCssFiles();
   } catch (err) {
     console.error(chalk.red("[Error] Error creating index files or compiling SCSS:"), err);
-    process.exit(1);
+    throw err;
   }
 })();
