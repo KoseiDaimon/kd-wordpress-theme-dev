@@ -11,7 +11,8 @@
     "build": "npm-run-all build:*",
     "build:rm": "node scripts/build/removeDist.js",
     "build:sass": "node scripts/build/optimizeSass.js",
-    "build:js": "node ./scripts/build/optimizeJs.js"
+    "build:js": "node ./scripts/build/optimizeJs.js",
+    "build:images": "node ./scripts/build/optimizeImages.js"
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",
