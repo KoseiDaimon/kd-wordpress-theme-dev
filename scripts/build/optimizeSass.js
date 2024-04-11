@@ -2,7 +2,6 @@ import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 import ScssProcessor from "../utils/ScssProcessor.js";
 import PostCssProcessor from "../utils/PostCssProcessor.js";
-import CleanCssProcessor from "../utils/CleanCssProcessor.js";
 
 // ソースディレクトリと出力ディレクトリを設定
 const srcDir = config.src.sass;
