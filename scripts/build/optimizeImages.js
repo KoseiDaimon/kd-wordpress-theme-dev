@@ -50,20 +50,24 @@ try {
       // 出力先ディレクトリを作成 (存在しない場合)
       await fs.mkdir(path.dirname(distPath), { recursive: true });
 
-      if (!supportedInputFormats.includes(fileExt)) {
-        // 条件1: サポートされていない入力フォーマットの場合はファイルをそのままコピー
+      // サポートされていない入力フォーマットの場合または、
+      // サポートされていない出力フォーマットかつ、Webpへの変換が無効化の場合は、
+      // 圧縮できないのでそのままコピーする
+      if (
+        !supportedInputFormats.includes(fileExt) ||
+        (!supportedOutputFormats.includes(fileExt) && !convertToWebp)
+      ) {
         Logger.log(
           "WARN",
           `Unsupported input format: ${fileExt} (${srcPath}). Copying the file as is.`
         );
         await fs.cp(srcPath, distPath);
-      } else if (!convertToWebp && !supportedOutputFormats.includes(fileExt)) {
-        // 条件2: WebP変換が無効で、サポートされていない出力フォーマットの場合はファイルをそのままコピー
-        Logger.log(
-          "WARN",
-          `Unsupported output format: ${fileExt} (${srcPath}). Copying the file as is.`
-        );
-        await fs.cp(srcPath, distPath);
+
+        // コピーしたことを示すINFOログを出力
+        Logger.log("INFO", `Copied: ${srcPath} -> ${distPath}`);
+
+        // 次のファイルの処理に進む
+        continue;
       } else {
         let processedDistPath;
         // サポートされている入力フォーマットの場合は変換処理を実行
@@ -93,7 +97,7 @@ try {
         // 圧縮前と後のファイルサイズを表示
         Logger.log(
           "INFO",
-          `Processed: ${srcPath} (${(srcSize / 1024).toFixed(
+          `Optimized: ${srcPath} (${(srcSize / 1024).toFixed(
             2
           )}KB) -> ${processedDistPath} (${(distSize / 1024).toFixed(2)}KB)`
         );
