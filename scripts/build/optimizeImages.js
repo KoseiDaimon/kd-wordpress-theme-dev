@@ -9,6 +9,7 @@ const srcDir = config.src.images;
 const distDir = config.dist.images;
 const convertToWebp = config.options.convertToWebp !== false;
 const webpQuality = config.options.webpQuality || 80;
+const maxWidth = config.options.maxWidth || 1920;
 const supportedInputFormats = [
   "jpeg",
   "jpg",
@@ -56,14 +57,14 @@ async function processImageFile(srcPath, distPath) {
       path.basename(distPath, path.extname(distPath)) + ".webp"
     );
     await sharp(srcPath)
-      .resize({ width: 800, withoutEnlargement: true })
+      .resize({ width: maxWidth, height: null, withoutEnlargement: true })
       .toFormat("webp", { quality: webpQuality })
       .toFile(processedDistPath);
   } else {
     // WebPに変換せずに画像を処理する
     processedDistPath = distPath;
     await sharp(srcPath)
-      .resize({ width: 800, withoutEnlargement: true })
+      .resize({ width: maxWidth, height: null, withoutEnlargement: true })
       .toFormat(fileExt, { quality: 80 })
       .toFile(processedDistPath);
   }

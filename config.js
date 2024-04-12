@@ -11,8 +11,9 @@ export const config = {
   },
   options: {
     logLevel: "debug",
-    minifyCss: true,
     convertToWebp: true,
     webpQuality: 80,
+    maxWidth: 1920,
+    minifyCss: true,
   },
 };
