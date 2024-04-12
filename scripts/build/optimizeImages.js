@@ -9,11 +9,28 @@ const srcDir = config.src.images;
 const distDir = config.dist.images;
 const convertToWebp = config.options.convertToWebp !== false;
 const webpQuality = config.options.webpQuality || 80;
-const supportedInputFormats = ["jpg", "jpeg", "png", "webp", "gif", "avif", "tiff", "svg"];
-const supportedOutputFormats = ["jpg", "jpeg", "png", "webp", "gif", "avif", "tiff"];
+const supportedInputFormats = [
+  "jpeg",
+  "jpg",
+  "png",
+  "webp",
+  "gif",
+  "avif",
+  "tiff",
+  "svg",
+];
+const supportedOutputFormats = [
+  "jpeg",
+  "jpg",
+  "png",
+  "webp",
+  "gif",
+  "avif",
+  "tiff",
+];
 
 // 画像ファイルのパスパターンを作成
-const srcGlob = path.join(srcDir, `/**/*.{${supportedInputFormats.join(",")}}`).replace(/\\/g, "/");
+const srcGlob = path.join(srcDir, "/**/*").replace(/\\/g, "/");
 
 try {
   // パターンにマッチする画像ファイルのパスを取得
@@ -24,7 +41,6 @@ try {
     Logger.log("WARN", `No image files found in ${srcDir}`);
   } else {
     await fs.mkdir(distDir, { recursive: true });
-
     // 各画像ファイルに対して処理を実行
     for (const srcPath of srcPaths) {
       const relPath = path.relative(srcDir, srcPath);
@@ -34,51 +50,55 @@ try {
       // 出力先ディレクトリを作成 (存在しない場合)
       await fs.mkdir(path.dirname(distPath), { recursive: true });
 
-      if (supportedInputFormats.includes(fileExt)) {
-        if (convertToWebp) {
-          // WebP形式に変換する
-          await sharp(srcPath)
-            .resize({ width: 800, withoutEnlargement: true })
-            .toFormat("webp", { quality: webpQuality })
-            .toFile(
-              path.join(
-                path.dirname(distPath),
-                path.basename(distPath, path.extname(distPath)) + ".webp"
-              )
-            );
-        } else if (supportedOutputFormats.includes(fileExt)) {
-          // 対応している出力フォーマットで出力する
-          await sharp(srcPath)
-            .resize({ width: 800, withoutEnlargement: true })
-            .toFormat(fileExt, { quality: 80 })
-            .toFile(distPath);
-        }
-      } else {
-        // サポートされていない入力フォーマットの場合はファイルをそのままコピー
+      if (!supportedInputFormats.includes(fileExt)) {
+        // 条件1: サポートされていない入力フォーマットの場合はファイルをそのままコピー
         Logger.log(
           "WARN",
           `Unsupported input format: ${fileExt} (${srcPath}). Copying the file as is.`
         );
-        await fs.copyFile(srcPath, distPath);
+        await fs.cp(srcPath, distPath);
+      } else if (!convertToWebp && !supportedOutputFormats.includes(fileExt)) {
+        // 条件2: WebP変換が無効で、サポートされていない出力フォーマットの場合はファイルをそのままコピー
+        Logger.log(
+          "WARN",
+          `Unsupported output format: ${fileExt} (${srcPath}). Copying the file as is.`
+        );
+        await fs.cp(srcPath, distPath);
+      } else {
+        let processedDistPath;
+        // サポートされている入力フォーマットの場合は変換処理を実行
+        if (convertToWebp) {
+          // WebP形式に変換する
+          processedDistPath = path.join(
+            path.dirname(distPath),
+            path.basename(distPath, path.extname(distPath)) + ".webp"
+          );
+          await sharp(srcPath)
+            .resize({ width: 800, withoutEnlargement: true })
+            .toFormat("webp", { quality: webpQuality })
+            .toFile(processedDistPath);
+        } else {
+          // 対応している出力フォーマットで出力する
+          processedDistPath = distPath;
+          await sharp(srcPath)
+            .resize({ width: 800, withoutEnlargement: true })
+            .toFormat(fileExt, { quality: 80 })
+            .toFile(processedDistPath);
+        }
+
+        // 圧縮前のファイルサイズを取得
+        const srcSize = (await fs.stat(srcPath)).size;
+        // 圧縮後のファイルサイズを取得
+        const distSize = (await fs.stat(processedDistPath)).size;
+        // 圧縮前と後のファイルサイズを表示
+        Logger.log(
+          "INFO",
+          `Processed: ${srcPath} (${(srcSize / 1024).toFixed(
+            2
+          )}KB) -> ${processedDistPath} (${(distSize / 1024).toFixed(2)}KB)`
+        );
       }
-
-      // 圧縮前のファイルサイズを取得
-      const srcSize = (await fs.stat(srcPath)).size;
-
-      // 圧縮後のファイルサイズを取得
-      const distSize = (
-        await fs.stat(convertToWebp ? distPath.replace(path.extname(distPath), ".webp") : distPath)
-      ).size;
-
-      // 圧縮前と後のファイルサイズを表示
-      Logger.log(
-        "INFO",
-        `Processed: ${srcPath} (${(srcSize / 1024).toFixed(2)}KB) -> ${
-          convertToWebp ? distPath.replace(path.extname(distPath), ".webp") : distPath
-        } (${(distSize / 1024).toFixed(2)}KB)`
-      );
     }
-
     Logger.log("INFO", "Image files processed successfully.");
   }
 } catch (err) {
