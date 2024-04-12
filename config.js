@@ -10,10 +10,10 @@ export const config = {
     css: "assets/css",
   },
   options: {
-    logLevel: "debug",
     convertToWebp: true,
     webpQuality: 80,
     maxWidth: 1920,
     minifyCss: true,
+    logLevel: "debug",
   },
 };
