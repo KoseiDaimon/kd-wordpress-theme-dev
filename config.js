@@ -1,4 +1,7 @@
 export const config = {
+  server: {
+    url: "http://localhost:8001",
+  },
   src: {
     images: "src/images",
     js: "src/js",
