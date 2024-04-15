@@ -2,7 +2,13 @@
 
 .c-test {
   background-color: red;
+  content: "あああ";
+  content: "あああ";
+  padding-left: 0;
+  padding-top: 0;
+  appearance: none;
   @include mq(md) {
     background-color: blue;
+    content: "あああ";
   }
 }

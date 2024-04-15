@@ -64,17 +64,17 @@ $color-blue: #2196F3;
 
 // ブレークポイントの定義
 $breakpoints: (
-  'sm': 400px,
-  'md': 768px,
+  'xl': 1440px,
   'lg': 1080px,
-  'xl': 1440px
+  'md': 768px,
+  'sm': 400px
 ) !default;
 
 // メディアクエリのミックスイン
 @mixin mq($breakpoint) {
   @if map-has-key($breakpoints, $breakpoint) {
     $breakpoint-value: map-get($breakpoints, $breakpoint);
-    @media (min-width: #{$breakpoint-value}) {
+    @media (max-width: #{$breakpoint-value - 1px}) {
       @content;
     }
   }
