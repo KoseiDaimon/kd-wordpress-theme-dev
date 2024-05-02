@@ -1,14 +1,17 @@
+// Node.jsのモジュールをインポート
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
 import { glob } from "glob";
+import { optimize } from "svgo";
 import { config } from "../../config.js";
 import Logger from "../utils/Logger.js";
 
-const srcDir = config.src.images;
-const distDir = config.dist.images;
+// 設定ファイルから画像ディレクトリと変換オプションを取得
+const srcImagesDir = config.src.images;
+const distImagesDir = config.dist.images;
 const convertToWebp = config.options.convertToWebp !== false;
-const webpQuality = config.options.webpQuality || 80;
+const imageQuality = config.options.imageQuality || 80;
 const maxWidth = config.options.maxWidth || 1920;
 const supportedInputFormats = [
   "jpeg",
@@ -20,25 +23,13 @@ const supportedInputFormats = [
   "tiff",
   "svg",
 ];
-const supportedOutputFormats = [
-  "jpeg",
-  "jpg",
-  "png",
-  "webp",
-  "gif",
-  "avif",
-  "tiff",
-];
 
+// 画像ファイルの処理を行う非同期関数
 async function processImageFile(srcPath, distPath) {
   const fileExt = path.extname(srcPath).slice(1).toLowerCase();
 
-  // 入力フォーマットがサポートされていない、または出力フォーマットがサポートされておらずWebP変換が無効の場合は、
-  // 圧縮せずにファイルをそのままコピーする
-  if (
-    !supportedInputFormats.includes(fileExt) ||
-    (!supportedOutputFormats.includes(fileExt) && !convertToWebp)
-  ) {
+  // 入力フォーマットがサポートされていない場合は、圧縮せずにファイルをそのままコピーする
+  if (!supportedInputFormats.includes(fileExt)) {
     Logger.log(
       "WARN",
       `Unsupported input format: ${fileExt} (${srcPath}). Copying the file as is.`
@@ -48,32 +39,64 @@ async function processImageFile(srcPath, distPath) {
     return;
   }
 
-  let processedDistPath;
+  // SVGファイルの場合は、SVGOで最適化を行う
+  if (fileExt === "svg") {
+    const svgData = await fs.readFile(srcPath, "utf8");
+    const optimizedSvg = optimize(svgData, {
+      multipass: true,
+      datauri: "unenc",
+      plugins: [
+        "preset-default",
+        "removeComments",
+        "cleanupAttrs",
+        "removeRasterImages",
+        "removeXMLNS",
+      ],
+    });
 
-  if (convertToWebp) {
-    // 画像をWebP形式に変換する
-    processedDistPath = path.join(
-      path.dirname(distPath),
-      path.basename(distPath, path.extname(distPath)) + ".webp"
+    // 出力先のパスを生成（ディレクトリ構造を維持）
+    const distPath = path.join(
+      distImagesDir,
+      path.relative(srcImagesDir, srcPath)
     );
-    await sharp(srcPath)
-      .resize({ width: maxWidth, height: null, withoutEnlargement: true })
-      .toFormat("webp", { quality: webpQuality })
-      .toFile(processedDistPath);
-  } else {
-    // WebPに変換せずに画像を処理する
-    processedDistPath = distPath;
-    await sharp(srcPath)
-      .resize({ width: maxWidth, height: null, withoutEnlargement: true })
-      .toFormat(fileExt, { quality: 80 })
-      .toFile(processedDistPath);
+
+    await fs.mkdir(path.dirname(distPath), { recursive: true });
+    await fs.writeFile(distPath, optimizedSvg.data);
+
+    const srcSize = (await fs.stat(srcPath)).size;
+    const distSize = (await fs.stat(distPath)).size;
+    Logger.log(
+      "INFO",
+      `Optimized SVG: ${srcPath} (${(srcSize / 1024).toFixed(
+        2
+      )}KB) -> ${distPath} (${(distSize / 1024).toFixed(2)}KB)`
+    );
+    return;
   }
 
-  // 処理前後のファイルサイズを計算する
+  // その他の画像ファイルの処理
+  let processedDistPath = path.join(
+    distImagesDir,
+    path.relative(srcImagesDir, distPath)
+  );
+  let outputFormat = fileExt;
+
+  if (convertToWebp) {
+    processedDistPath = `${processedDistPath.slice(
+      0,
+      -path.extname(processedDistPath).length
+    )}.webp`;
+    outputFormat = "webp";
+  }
+
+  await fs.mkdir(path.dirname(processedDistPath), { recursive: true });
+  await sharp(srcPath)
+    .resize({ width: maxWidth, height: null, withoutEnlargement: true })
+    .toFormat(outputFormat, { quality: imageQuality })
+    .toFile(processedDistPath);
+
   const srcSize = (await fs.stat(srcPath)).size;
   const distSize = (await fs.stat(processedDistPath)).size;
-
-  // 最適化結果をログに出力する
   Logger.log(
     "INFO",
     `Optimized: ${srcPath} (${(srcSize / 1024).toFixed(
@@ -84,40 +107,30 @@ async function processImageFile(srcPath, distPath) {
 
 async function main() {
   try {
-    // ソース画像ファイルのグロブパターンを生成する
-    const srcGlob = path.join(srcDir, "/**/*").replace(/\\/g, "/");
-
-    // ソース画像ファイルのパスのリストを取得する
+    const srcGlob = path.join(srcImagesDir, "/**/*").replace(/\\/g, "/");
     const srcPaths = await glob(srcGlob, { nodir: true });
 
-    // 画像ファイルが見つからない場合はチェックする
     if (srcPaths.length === 0) {
-      Logger.log("WARN", `No image files found in ${srcDir}`);
+      Logger.log("WARN", `No image files found in ${srcImagesDir}`);
       return;
     }
 
-    // 出力ディレクトリが存在しない場合は作成する
-    await fs.mkdir(distDir, { recursive: true });
+    await fs.mkdir(distImagesDir, { recursive: true });
 
-    // 各ソース画像ファイルを処理する
     for (const srcPath of srcPaths) {
-      const relPath = path.relative(srcDir, srcPath);
-      const distPath = path.join(distDir, relPath);
+      const distPath = path.join(
+        distImagesDir,
+        path.relative(srcImagesDir, srcPath)
+      );
 
-      // 現在の画像ファイルの出力ディレクトリを作成する
       await fs.mkdir(path.dirname(distPath), { recursive: true });
-
-      // 画像ファイルを処理する
       await processImageFile(srcPath, distPath);
     }
 
-    // 成功メッセージをログに出力する
     Logger.log("INFO", "Image files processed successfully.");
   } catch (err) {
-    // エラーが発生した場合はログに出力する
     Logger.log("ERROR", err);
   }
 }
 
-// メイン関数を実行する
 main();
