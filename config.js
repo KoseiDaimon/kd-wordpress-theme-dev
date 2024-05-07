@@ -16,6 +16,7 @@ export const config = {
     convertToWebp: true,
     imageQuality: 80,
     maxWidth: 1920,
+    minifyJs: false,
     minifyCss: true,
     logLevel: "debug",
   },
