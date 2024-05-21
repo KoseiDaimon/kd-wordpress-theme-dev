@@ -7,5 +7,5 @@ Logger.log("INFO", `Starting Browser Sync with proxy: ${serverUrl}`);
 
 browserSync.init({
   proxy: serverUrl,
-  files: ["./assets/**/*", "./*.php"],
+  files: ["./assets/**/*", "./*.php", "./**/*.php"],
 });
