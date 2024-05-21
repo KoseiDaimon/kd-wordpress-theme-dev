@@ -18,7 +18,6 @@ const supportedInputFormats = [
   "jpg",
   "png",
   "webp",
-  "gif",
   "avif",
   "tiff",
   "svg",
