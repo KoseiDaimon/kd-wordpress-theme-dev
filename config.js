@@ -13,11 +13,11 @@ export const config = {
     css: "assets/css",
   },
   options: {
-    convertToWebp: true,
+    convertToWebp: false,
     imageQuality: 80,
     maxWidth: 1920,
     minifyJs: false,
-    minifyCss: true,
+    minifyCss: false,
     logLevel: "debug",
   },
 };
